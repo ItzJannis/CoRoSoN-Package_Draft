@@ -27,16 +27,88 @@
 *
 *********************************************************************/
 #include <Arduino.h>
+#include <Pixy2I2C.h>
 #include "CoRoSoN_Util.h"
-#include "CoRoSoN_I2C.h"
 /*********************************************************************
 * 
 *  Types
 *
 *********************************************************************/
-/*********************************************************************
-* 
-*  Functions
-*
-*********************************************************************/
+//
+// Pixy class
+//
+class Pixy {
+public:
+  /************************************************************
+  *
+  * ? Pixy()
+  *   
+  * * Description:
+  *     Constructor
+  *
+  ************************************************************/
+  Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
+  /************************************************************
+  *
+  * ? UpdateData()
+  *   
+  * * Description:
+  *     Reads the new data
+  *
+  ************************************************************/
+  ERRORS ReadUpdate(void);
+  /************************************************************
+  *
+  * ? SeesGoal()
+  *   
+  * * Description:
+  *     Returns if the goal is seen
+  *
+  ************************************************************/
+  bool SeesGoal(void);
+  /************************************************************
+  *
+  * ? SeesOwnGoal()
+  *   
+  * * Description:
+  *     Returns if the own goal is seen
+  *
+  ************************************************************/
+  bool SeesOwnGoal(void);
+  /************************************************************
+  *
+  * ? DirectionGoal()
+  *   
+  * * Description:
+  *     Returns the goals directions in terms of pixels
+  * 
+  *     < 0 => goal to the left
+  *     > 0 => goal to the right
+  *
+  ************************************************************/
+  int DirectionGoal(void);
+  /************************************************************
+  *
+  * ? DirectionOwnGoal()
+  *   
+  * * Description:
+  *     Returns if the own goal is seen
+  * 
+  *     < 0 => own goal to the left
+  *     > 0 => own goal to the right
+  *
+  ************************************************************/
+  int DirectionOwnGoal(void);
+private:
+  struct {
+    Pixy2I2C*      pPixy;
+    unsigned short Address;
+             int   SignatureGoal;
+             int   SignatureOwnGoal;
+             bool  SeesGoal;
+             bool  SeesOwnGoal;
+             int   DirectionGoal;
+             int   DirectionOwnGoal;
+  } mPriv;
+};
 #endif // COROSON_PIXY_H

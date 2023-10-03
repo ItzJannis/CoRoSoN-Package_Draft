@@ -23,7 +23,6 @@
 *  Dependencies
 *
 *********************************************************************/
-#include <Wire.h>
 #include "CoRoSoN_Compass.h"
 /*********************************************************************
 * 
@@ -38,7 +37,7 @@ Compass::Compass(unsigned short Address) {
 
   Wire.beginTransmission(this->mPriv.Address);
   if(Wire.endTransmission()) {
-    DEBUG_ERRORS(CONNECT_FAILED | ERROR_BREAK_OUT);
+    DEBUG_ERRORS(CONNECT_FAILED);
     DEBUG_PRINT(Address);
     DEBUG_BLOCK("Compass init failed", 1000);
   }
