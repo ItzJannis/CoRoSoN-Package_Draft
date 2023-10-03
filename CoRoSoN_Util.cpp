@@ -30,6 +30,7 @@
 *
 *********************************************************************/
 #ifdef BB_DEBUG
+
   static const ERROR_CODE _aCodes[] = {
      OKAY             
     ,CONNECT_FAILED   
@@ -53,6 +54,8 @@
     ,"ERROR_HANDLED" 
     ,"ERROR_BREAK_OUT"  
   };
+
+
 
   void _DEBUG_ERRORS(String Origin, ERRORS Errors) {
     String OutputString;

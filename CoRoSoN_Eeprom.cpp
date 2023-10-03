@@ -15,31 +15,38 @@
 *
 *********************************************************************/
 // -------------------------------------------------------------------
-// File:    CoRoSoN.h
-// Purpose: Main header of CoRoSoN kit meant to run on the main board
+// File:    CoRoSoN_Eeprom.cpp
+// Purpose: Implementations for CoRoSoN_Eeprom.h
 // -------------------------------------------------------------------
-#ifndef COROSON_H
-#define COROSON_H
 /*********************************************************************
 * 
 *  Dependencies
 *
 *********************************************************************/
-#include <Arduino.h>
-#include "CoRoSoN_Util.h"
 #include "CoRoSoN_Eeprom.h"
-#include "CoRoSoN_I2C.h"
-#include "CoRoSoN_IR-Ring.h"
-#include "CoRoSoN_Pixy.h"
-#include "CoRoSoN_Compass.h"
 /*********************************************************************
 * 
-*  Types
+*  Implementations
 *
 *********************************************************************/
-/*********************************************************************
-* 
-*  Functions
-*
-*********************************************************************/
-#endif // COROSON_H
+ERRORS EEPROM_Init() {
+  if (!EEPROM.begin(sizeof(EEPROM_DATA))) {
+    return (CONNECT_FAILED | ERROR_BREAK_OUT);
+  }
+  return OKAY;
+}
+
+EEPROM_DATA EEPROM_Read() {
+  EEPROM_DATA Data;
+  ZEROFILL(Data); // Init data with 0s
+  EEPROM.readBytes(EEPROM_RW_ADD, &Data, sizeof(EEPROM_DATA));
+  return Data;
+}
+
+ERRORS EEPROM_Write(const EEPROM_DATA& Data) {
+  EEPROM.writeBytes(EEPROM_RW_ADD, &Data, sizeof(EEPROM_DATA));
+  if (!EEPROM.commit()) {
+    return (CONNECT_FAILED | ERROR_BREAK_OUT);
+  }
+  return OKAY;
+}
