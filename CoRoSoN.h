@@ -10,6 +10,9 @@
 *      Project:     https://github.com/CoRoSoN-Kit/
 *      Competition: https://www.robocup.org/
 *
+*      Created by BohleBots
+*         https://www.bohlebots.de
+*
 *********************************************************************/
 // -------------------------------------------------------------------
 // File:    CoRoSoN.h
