@@ -29,7 +29,12 @@
 *  Implementations
 *
 *********************************************************************/
-ERRORS EEPROM_Init() {
+unsigned int _Address = 0;
+
+
+
+ERRORS EEPROM_Init(unsigned int Address) {
+  _Address = Address;
   if (!EEPROM.begin(sizeof(EEPROM_DATA))) {
     return (CONNECT_FAILED | ERROR_BREAK_OUT);
   }
@@ -39,12 +44,12 @@ ERRORS EEPROM_Init() {
 EEPROM_DATA EEPROM_Read() {
   EEPROM_DATA Data;
   ZEROFILL(Data); // Init data with 0s
-  EEPROM.readBytes(EEPROM_RW_ADD, &Data, sizeof(EEPROM_DATA));
+  EEPROM.readBytes(_Address, &Data, sizeof(EEPROM_DATA));
   return Data;
 }
 
 ERRORS EEPROM_Write(const EEPROM_DATA& Data) {
-  EEPROM.writeBytes(EEPROM_RW_ADD, &Data, sizeof(EEPROM_DATA));
+  EEPROM.writeBytes(_Address, &Data, sizeof(EEPROM_DATA));
   if (!EEPROM.commit()) {
     return (CONNECT_FAILED | ERROR_BREAK_OUT);
   }

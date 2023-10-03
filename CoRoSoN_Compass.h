@@ -34,9 +34,46 @@
 *  Types
 *
 *********************************************************************/
-/*********************************************************************
-* 
-*  Functions
-*
-*********************************************************************/
+//
+// Compass class
+//
+class Compass {
+public:
+  /************************************************************
+  *
+  * ? Compass()
+  *   
+  * * Description:
+  *     Constructor
+  *
+  ************************************************************/
+  Compass(unsigned short Address);
+  /************************************************************
+  *
+  * ? SetHeading()
+  *   
+  * * Description:
+  *     Sets the heading of the compass to the current state
+  *
+  ************************************************************/
+  ERRORS SetHeading(void);
+  /************************************************************
+  *
+  * ? HeadingDirection()
+  *   
+  * * Description:
+  *     Returns the direction of the heading related 
+  *     to the current state
+  *     
+  *     < 0 => heading left  / turned to the right
+  *     > 0 => heading right / turned to the left 
+  *
+  ************************************************************/
+  int HeadingAngle(void);
+private:
+  struct {
+    unsigned short Address;
+             int   Heading;
+  } mPriv;
+};
 #endif // COROSON_COMPASS_H

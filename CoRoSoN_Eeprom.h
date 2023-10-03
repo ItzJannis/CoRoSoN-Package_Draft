@@ -32,12 +32,6 @@
 #include "CoRoSoN_Util.h"
 /*********************************************************************
 * 
-*  Config
-*
-*********************************************************************/
-#define EEPROM_RW_ADD 0 // Address to read from and write to
-/*********************************************************************
-* 
 *  Types
 *
 *********************************************************************/
@@ -59,16 +53,16 @@ struct EEPROM_DATA {
 * ! [SETUP]
 * ? EEPROM_Init()
 *   
-* * Beschreibung:
+* * Description:
 *     Initializes the ESP32's eeprom
 *
 ************************************************************/
-ERRORS EEPROM_Init();
+ERRORS EEPROM_Init(unsigned int Address);
 /************************************************************
 *
 * ? EEPROM_Read()
 *   
-* * Beschreibung:
+* * Description:
 *     reads the currently in the eeprom stored EEPROM_DATA
 *
 ************************************************************/
@@ -77,8 +71,8 @@ EEPROM_DATA EEPROM_Read();
 *
 * ? EEPROM_Write()
 *   
-* * Beschreibung:
-*     Schreibt die uebergebenen Daten in das EEPROMs
+* * Description:
+*     Writes the passed EEPROM_DATA to the eeprom
 *
 ************************************************************/
 ERRORS EEPROM_Write(const EEPROM_DATA& Data);
