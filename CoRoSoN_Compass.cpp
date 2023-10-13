@@ -32,7 +32,7 @@
 static int _Angle8 = 1;
 
 Compass::Compass(unsigned short Address) {
-  ZEROFILL(this->mPriv);
+  ZEROMEM(this->mPriv);
   this->mPriv.Address = Address;
 
   Wire.beginTransmission(this->mPriv.Address);

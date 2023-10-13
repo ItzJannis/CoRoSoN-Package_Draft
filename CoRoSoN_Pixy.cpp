@@ -31,7 +31,7 @@
 *********************************************************************/
 
 Pixy::Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal) {
-  ZEROFILL(this->mPriv);
+  ZEROMEM(this->mPriv);
   this->mPriv.Address          = Address;
   this->mPriv.SignatureGoal    = SignatureGoal;
   this->mPriv.SignatureOwnGoal = SignatureOwnGoal;

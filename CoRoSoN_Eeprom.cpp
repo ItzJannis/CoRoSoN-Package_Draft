@@ -43,7 +43,7 @@ ERRORS EEPROM_Init(unsigned int Address) {
 
 EEPROM_DATA EEPROM_Read() {
   EEPROM_DATA Data;
-  ZEROFILL(Data); // Init data with 0s
+  ZEROMEM(Data); // Init data with 0s
   EEPROM.readBytes(_Address, &Data, sizeof(EEPROM_DATA));
   return Data;
 }
