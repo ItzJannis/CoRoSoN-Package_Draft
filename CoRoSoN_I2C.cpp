@@ -55,6 +55,7 @@ ERRORS I2C_TestConnection(int Address) {
   ERRORS r;
 
   r = OKAY;
+  EnsureInit();
   Wire.beginTransmission(Address);
   if(Wire.endTransmission()) {
     r = CONNECT_FAILED;
@@ -67,7 +68,6 @@ ERRORS I2C_TestConnection(int Address) {
 
 ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
   ERRORS r;
-  int    i;
   int    MessageLength;
 
   r = OKAY;
@@ -78,6 +78,7 @@ ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
     DEBUG_PRINT(NumBytes);
     return r;
   }
+  EnsureInit();
   Wire.begin(Address);
   MessageLength = Wire.write(aMessageBytes, NumBytes);
   if(MessageLength != NumBytes) {
@@ -96,7 +97,6 @@ ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
 
 ERRORS I2C_ReadBlocking(int Address, byte aAnswerBytes[], unsigned int NumBytes) {
   ERRORS r;
-  int    i;
   int    AnswerLength;
 
   r = OKAY;
@@ -108,6 +108,7 @@ ERRORS I2C_ReadBlocking(int Address, byte aAnswerBytes[], unsigned int NumBytes)
     DEBUG_PRINT(NumBytes);
     return r;
   }
+  EnsureInit();
   r = I2C_TestConnection(Address);
   if(r) {
     r |= ERROR_BREAK_OUT;
