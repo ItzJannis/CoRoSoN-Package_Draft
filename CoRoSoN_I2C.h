@@ -27,15 +27,62 @@
 *
 *********************************************************************/
 #include <Arduino.h>
+#include <Wire.h>
 #include "CoRoSoN_Util.h"
 /*********************************************************************
 * 
 *  Types
 *
 *********************************************************************/
+typedef struct I2C_DATA {
+  byte B; // modify this struct to 
+} I2C_DATA;
 /*********************************************************************
 * 
 *  Functions
 *
 *********************************************************************/
+/************************************************************
+*
+* ? I2C_Init()
+*   
+* * Description:
+*     Initialises the I2C bus on the board with 
+*     the given data and clock pin
+*
+************************************************************/
+ERRORS I2C_Init(unsigned int SerialDataPin, unsigned int SerialClockPin);
+/************************************************************
+*
+* ? I2C_TestConnection()
+*   
+* * Description:
+*     Tests if connection to the given address is possible
+*
+************************************************************/
+ERRORS I2C_TestConnection(int Address);
+/************************************************************
+*
+* ? I2C_Write()
+*   
+* * Description:
+*     Writes the passed Data byte per byte to the given address
+*
+************************************************************/
+ERRORS I2C_Write(int Address, const I2C_DATA& Data);
+/************************************************************
+*
+* ? I2C_Read()
+*   
+* * Description:
+*     Reads the passed number of bytes from the passed 
+*     address and stores the answer in the passed byte array
+* ! Attention:
+*     This functions waits for the answers and is therefore 
+*     blocking
+*     Make sure that NumBytes equals the length of the 
+*     passed byte array
+*
+************************************************************/
+ERRORS I2C_ReadBlocking(int Address, byte aAnswerBytes[], unsigned int NumBytes);
 #endif // COROSON_I2C_H
