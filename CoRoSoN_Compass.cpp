@@ -29,7 +29,7 @@
 *  Implementations
 *
 *********************************************************************/
-static int _Angle8 = 1;
+static byte _aMessage[1] = { 0b00000001 };
 
 Compass::Compass(unsigned short Address) {
   ERRORS r;
@@ -50,14 +50,11 @@ ERRORS Compass::SetHeading() {
   unsigned char LowByte;
   unsigned char Angle8Bit;
   unsigned int  Angle16Bit;
-  byte          aMessage[1];
   byte          aAnswer[3];
   
   r = OKAY;
-  ZEROMEM(aMessage);
   ZEROMEM(aAnswer);
-  aMessage[0] = _Angle8;
-  r = I2C_Write(this->mPriv.Address, aMessage, ARRAY_LENGTH(aMessage));
+  r = I2C_Write(this->mPriv.Address, _aMessage, ARRAY_LENGTH(_aMessage));
   if(r) {
     r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
@@ -72,7 +69,7 @@ ERRORS Compass::SetHeading() {
     DEBUG_ERRORS(r);
     return r;
   }
-  Angle8Bit = aAnswer[0];
+  Angle8Bit = aAnswer[0]; (void)Angle8Bit;
   HighByte  = aAnswer[1];
   LowByte   = aAnswer[2];
   //
@@ -94,14 +91,11 @@ int Compass::HeadingAngle() {
   unsigned char LowByte;
   unsigned char Angle8Bit;
   unsigned int  Angle16Bit;
-  byte          aMessage[1];
   byte          aAnswer[3];
   int           HeadingAngle;
   
-  ZEROMEM(aMessage);
   ZEROMEM(aAnswer);
-  aMessage[0] = _Angle8;
-  r = I2C_Write(this->mPriv.Address, aMessage, ARRAY_LENGTH(aMessage));
+  r = I2C_Write(this->mPriv.Address, _aMessage, ARRAY_LENGTH(_aMessage));
   if(r) {
     r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
@@ -114,7 +108,7 @@ int Compass::HeadingAngle() {
     r |= INVALID_ANSWER | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
   }
-  Angle8Bit = aAnswer[0];
+  Angle8Bit = aAnswer[0]; (void)Angle8Bit;
   HighByte  = aAnswer[1];
   LowByte   = aAnswer[2];
   //
