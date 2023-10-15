@@ -65,16 +65,26 @@ ERRORS I2C_TestConnection(int Address) {
   return r;
 }
 
-ERRORS I2C_Write(int Address, const I2C_DATA& Data) {
+ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
   ERRORS r;
-  byte*  paDataBytes;
   int    i;
+  int    MessageLength;
 
   r = OKAY;
-  paDataBytes = (byte*)(&Data);
+  if(ARRAY_LENGTH(aMessageBytes) != NumBytes) {
+    r = INVALID_PARAMETER | ERROR_BREAK_OUT;
+    DEBUG_ERRORS(r);
+    DEBUG_PRINT(ARRAY_LENGTH(aMessageBytes));
+    DEBUG_PRINT(NumBytes);
+    return r;
+  }
   Wire.begin(Address);
-  for(i = 0; i < ARRAY_LENGTH(paDataBytes); i++) {
-    Wire.write(paDataBytes[i]);
+  MessageLength = Wire.write(aMessageBytes, NumBytes);
+  if(MessageLength != NumBytes) {
+    r |= INVALID_ANSWER;
+    DEBUG_ERRORS(r);
+    DEBUG_PRINT(MessageLength);
+    DEBUG_PRINT(NumBytes);
   }
   if(Wire.endTransmission()) {
     r = CONNECT_FAILED;

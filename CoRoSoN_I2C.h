@@ -31,14 +31,6 @@
 #include "CoRoSoN_Util.h"
 /*********************************************************************
 * 
-*  Types
-*
-*********************************************************************/
-typedef struct I2C_DATA {
-  byte B; // modify this struct to 
-} I2C_DATA;
-/*********************************************************************
-* 
 *  Functions
 *
 *********************************************************************/
@@ -69,7 +61,7 @@ ERRORS I2C_TestConnection(int Address);
 *     Writes the passed Data byte per byte to the given address
 *
 ************************************************************/
-ERRORS I2C_Write(int Address, const I2C_DATA& Data);
+ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes);
 /************************************************************
 *
 * ? I2C_Read()

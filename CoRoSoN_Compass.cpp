@@ -32,12 +32,13 @@
 static int _Angle8 = 1;
 
 Compass::Compass(unsigned short Address) {
+  ERRORS r;
+
   ZEROMEM(this->mPriv);
   this->mPriv.Address = Address;
-
-  Wire.beginTransmission(this->mPriv.Address);
-  if(Wire.endTransmission()) {
-    DEBUG_ERRORS(CONNECT_FAILED);
+  r = I2C_TestConnection(Address);
+  if(r) {
+    DEBUG_ERRORS(r);
     DEBUG_PRINT(Address);
     DEBUG_BLOCK("Compass init failed", 1000);
   }
@@ -49,29 +50,31 @@ ERRORS Compass::SetHeading() {
   unsigned char LowByte;
   unsigned char Angle8Bit;
   unsigned int  Angle16Bit;
+  byte          aMessage[1];
+  byte          aAnswer[3];
   
   r = OKAY;
-  Wire.beginTransmission(this->mPriv.Address);
-  Wire.write(_Angle8);
-  //
-  // Check if connect failed
-  //
-  if(Wire.endTransmission()) {
-    r = (CONNECT_FAILED | ERROR_BREAK_OUT);
+  ZEROMEM(aMessage);
+  ZEROMEM(aAnswer);
+  aMessage[0] = _Angle8;
+  r = I2C_Write(this->mPriv.Address, aMessage, ARRAY_LENGTH(aMessage));
+  if(r) {
+    r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
-    DEBUG_PRINT(this->mPriv.Address);
     return r;
   }
   //
   // Read answer
   //
-  Wire.requestFrom(this->mPriv.Address, 3);
-  while (Wire.available() < 3) {
-    ; // wait for 3 byte
+  r = I2C_ReadBlocking(this->mPriv.Address, aAnswer, ARRAY_LENGTH(aAnswer));
+  if(r) {
+    r |= INVALID_ANSWER | ERROR_BREAK_OUT;
+    DEBUG_ERRORS(r);
+    return r;
   }
-  Angle8Bit = Wire.read(); (void)Angle8Bit; // ignore first byte
-  HighByte  = Wire.read();
-  LowByte   = Wire.read();
+  Angle8Bit = aAnswer[0];
+  HighByte  = aAnswer[1];
+  LowByte   = aAnswer[2];
   //
   // Encode answer
   //
@@ -86,31 +89,34 @@ ERRORS Compass::SetHeading() {
 }
 
 int Compass::HeadingAngle() {
+  ERRORS        r;
   unsigned char HighByte;
   unsigned char LowByte;
   unsigned char Angle8Bit;
   unsigned int  Angle16Bit;
+  byte          aMessage[1];
+  byte          aAnswer[3];
   int           HeadingAngle;
   
-  Wire.beginTransmission(this->mPriv.Address);
-  Wire.write(_Angle8);
-  //
-  // Check if connect failed
-  //
-  if(Wire.endTransmission()) {
-    DEBUG_ERRORS(CONNECT_FAILED | ERROR_BREAK_OUT);
-    DEBUG_PRINT(this->mPriv.Address);
+  ZEROMEM(aMessage);
+  ZEROMEM(aAnswer);
+  aMessage[0] = _Angle8;
+  r = I2C_Write(this->mPriv.Address, aMessage, ARRAY_LENGTH(aMessage));
+  if(r) {
+    r |= CONNECT_FAILED | ERROR_BREAK_OUT;
+    DEBUG_ERRORS(r);
   }
   //
   // Read answer
   //
-  Wire.requestFrom(this->mPriv.Address, 3);
-  while (Wire.available() < 3) {
-    ; // wait for 3 byte
+  r = I2C_ReadBlocking(this->mPriv.Address, aAnswer, ARRAY_LENGTH(aAnswer));
+  if(r) {
+    r |= INVALID_ANSWER | ERROR_BREAK_OUT;
+    DEBUG_ERRORS(r);
   }
-  Angle8Bit = Wire.read(); (void)Angle8Bit; // ignore first byte
-  HighByte  = Wire.read();
-  LowByte   = Wire.read();
+  Angle8Bit = aAnswer[0];
+  HighByte  = aAnswer[1];
+  LowByte   = aAnswer[2];
   //
   // Encode answer
   //
