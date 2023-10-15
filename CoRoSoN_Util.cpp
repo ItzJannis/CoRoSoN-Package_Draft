@@ -29,7 +29,8 @@
 *  Implementations
 *
 *********************************************************************/
-#ifdef BB_DEBUG
+#ifdef COROSON_DEBUG
+  #pragma message("Debug macros are enabled, to disable remove \"#define COROSON_DEBUG\" in CoRoSoN_Util.h")
 
   static const ERROR_CODE _aCodes[] = {
      OKAY             
@@ -75,4 +76,6 @@
   Print:
     Serial.println(OutputString);
   }
-#endif // BB_DEBUG
+#else
+  #pragma message("Debug macros are disabled, to enable add \"#define COROSON_DEBUG\" in CoRoSoN_Util.h")
+#endif // COROSON_DEBUG

@@ -32,7 +32,7 @@
 *  Config
 *
 *********************************************************************/
-#define BB_DEBUG // uncomment to shut off debug functionality
+#define COROSON_DEBUG // uncomment to shut off debug functionality
 /*********************************************************************
 * 
 *  Types
@@ -93,7 +93,7 @@ enum ERROR_CODE : ERRORS {
 *  Functions
 *
 *********************************************************************/
-#ifdef BB_DEBUG
+#ifdef COROSON_DEBUG
   //
   // name of the current file as a native C String (char* / "text")
   #define FILENAME (strrchr(__FILE__, '/') ? (strrchr(__FILE__, '/') + 1) : __FILE__)
@@ -109,14 +109,14 @@ enum ERROR_CODE : ERRORS {
   //
   // blocks the programm in an endless loop by epeatadly prints the passed massage every numMillis milliseconds
   #define DEBUG_BLOCK(Message, NumMillis) do { Serial.println(ORIGIN + Message); delay(NumMillis); } while(1)
-#else // BB_DEBUG
+#else // COROSON_DEBUG
   // define all the debug functions as nothing if not in debug config
   #define FILENAME
   #define ORIGIN
   #define DEBUG_PRINT(Variable)
   #define DEBUG_ERRORS(Errors)
   #define DEBUG_BLOCK(Message, NumMillis)
-#endif // BB_DEBUG
+#endif // COROSON_DEBUG
 //
 // Returns the smaller one of the two values
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
@@ -135,7 +135,7 @@ enum ERROR_CODE : ERRORS {
 // 
 // Do not call these directly!
 //
-#ifdef BB_DEBUG
+#ifdef COROSON_DEBUG
   void _DEBUG_ERRORS(String Origin, ERRORS Errors);
-#endif // BB_DEBUG
+#endif // COROSON_DEBUG
 #endif // COROSON_UTIL_H
