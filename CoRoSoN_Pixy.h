@@ -50,13 +50,13 @@ public:
   Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
   /************************************************************
   *
-  * ? UpdateData()
+  * ? Update()
   *   
   * * Description:
   *     Reads the new data
   *
   ************************************************************/
-  ERRORS ReadUpdate(void);
+  ERRORS Update(void);
   /************************************************************
   *
   * ? SeesGoal()

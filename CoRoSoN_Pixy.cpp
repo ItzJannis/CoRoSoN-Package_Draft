@@ -43,7 +43,7 @@ Pixy::Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal) {
   }
 }
 
-ERRORS Pixy::ReadUpdate(void) {
+ERRORS Pixy::Update(void) {
   ERRORS r;
   int    Signature;
   int    X;

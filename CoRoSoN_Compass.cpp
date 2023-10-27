@@ -29,7 +29,7 @@
 *  Implementations
 *
 *********************************************************************/
-static byte _aMessage[1] = { 0b00000001 };
+static byte _aRequestMessage[1] = { 0b00000001 };
 
 Compass::Compass(unsigned short Address) {
   ERRORS r;
@@ -54,7 +54,7 @@ ERRORS Compass::SetHeading() {
   
   r = OKAY;
   ZEROMEM(aAnswer);
-  r = I2C_Write(this->mPriv.Address, _aMessage, ARRAY_LENGTH(_aMessage));
+  r = I2C_Write(this->mPriv.Address, _aRequestMessage, ARRAY_LENGTH(_aRequestMessage));
   if(r) {
     r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
@@ -95,7 +95,7 @@ int Compass::HeadingAngle() {
   int           HeadingAngle;
   
   ZEROMEM(aAnswer);
-  r = I2C_Write(this->mPriv.Address, _aMessage, ARRAY_LENGTH(_aMessage));
+  r = I2C_Write(this->mPriv.Address, _aRequestMessage, ARRAY_LENGTH(_aRequestMessage));
   if(r) {
     r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
