@@ -1,18 +1,26 @@
 // -------------------------------------------------------------------
 /*********************************************************************
 * 
-*      CoRoSoN
-*         Co|mponents for 
-*         Ro|bocupJunior
-*         So|ccer
-*          N|ewcomers
+* !    LICENSE
+*         TODO: what kind of licens to use?
 *
-*      Project:     https://github.com/CoRoSoN-Kit/
-*      Competition: https://www.robocup.org/
+*********************************************************************/
+// -------------------------------------------------------------------
+/*********************************************************************
+* 
+* *     CoRoSoN
+* *       Co|mponents for 
+* *       Ro|bocupJunior
+* *       So|ccer
+* *        N|ewcomers
 *
-*      Created by BohleBots
-*         https://www.bohlebots.de
+* *    Project:     https://github.com/CoRoSoN-Kit/
+* *    Competition: https://www.robocup.org/
 *
+* *    Created by BohleBots:
+* *       https://www.bohlebots.de
+* *       info@bohlebots.de
+* 
 *********************************************************************/
 // -------------------------------------------------------------------
 // File:    CoRoSoN.cpp
