@@ -29,7 +29,7 @@
 #include <Arduino.h>
 /*********************************************************************
 * 
-*  Config
+*  Configuration
 *
 *********************************************************************/
 #define COROSON_DEBUG // uncomment to shut off debug functionality

@@ -31,7 +31,7 @@
 *********************************************************************/
 static bool _InitSuccessful = false;
 
-static void EnsureInit(void) {
+static void _CheckInit(void) {
   if(!_InitSuccessful) {
     DEBUG_BLOCK("I2C_Init() was not called to set data and clock pin before using I2C", 1000);
   }
@@ -42,7 +42,7 @@ ERRORS I2C_Init(unsigned int SerialDataPin, unsigned int SerialClockPin) {
 
   ZEROMEM(r);
   if(!Wire.begin(SerialDataPin, SerialClockPin)) {
-    r = (CONNECT_FAILED | ERROR_BREAK_OUT);
+    r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
     DEBUG_BLOCK("I2C-Bus konnte nicht gestartet werden", 1000);
   } else {
@@ -55,10 +55,10 @@ ERRORS I2C_TestConnection(int Address) {
   ERRORS r;
 
   r = OKAY;
-  EnsureInit();
+  _CheckInit();
   Wire.beginTransmission(Address);
   if(Wire.endTransmission()) {
-    r = CONNECT_FAILED;
+    r |= CONNECT_FAILED;
     DEBUG_ERRORS(r);
     DEBUG_PRINT(Address);
     DEBUG_BLOCK("Connection test failed", 1000);
@@ -72,13 +72,13 @@ ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
 
   r = OKAY;
   if(ARRAY_LENGTH(aMessageBytes) != NumBytes) {
-    r = INVALID_PARAMETER | ERROR_BREAK_OUT;
+    r |= INVALID_PARAMETER | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
     DEBUG_PRINT(ARRAY_LENGTH(aMessageBytes));
     DEBUG_PRINT(NumBytes);
     return r;
   }
-  EnsureInit();
+  _CheckInit();
   Wire.begin(Address);
   MessageLength = Wire.write(aMessageBytes, NumBytes);
   if(MessageLength != NumBytes) {
@@ -88,7 +88,7 @@ ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
     DEBUG_PRINT(NumBytes);
   }
   if(Wire.endTransmission()) {
-    r = CONNECT_FAILED;
+    r |= CONNECT_FAILED;
     DEBUG_ERRORS(r);
     DEBUG_PRINT(Address);
   }
@@ -102,13 +102,13 @@ ERRORS I2C_ReadBlocking(int Address, byte aAnswerBytes[], unsigned int NumBytes)
   r = OKAY;
   ZEROMEM(aAnswerBytes);
   if(ARRAY_LENGTH(aAnswerBytes) != NumBytes) {
-    r = INVALID_PARAMETER | ERROR_BREAK_OUT;
+    r |= INVALID_PARAMETER | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
     DEBUG_PRINT(ARRAY_LENGTH(aAnswerBytes));
     DEBUG_PRINT(NumBytes);
     return r;
   }
-  EnsureInit();
+  _CheckInit();
   r = I2C_TestConnection(Address);
   if(r) {
     r |= ERROR_BREAK_OUT;

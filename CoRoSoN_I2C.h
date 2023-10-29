@@ -64,7 +64,7 @@ ERRORS I2C_TestConnection(int Address);
 ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes);
 /************************************************************
 *
-* ? I2C_Read()
+* ? I2C_ReadBlocking()
 *   
 * * Description:
 *     Reads the passed number of bytes from the passed 

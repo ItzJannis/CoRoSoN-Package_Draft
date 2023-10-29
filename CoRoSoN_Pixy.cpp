@@ -62,7 +62,7 @@ ERRORS Pixy::Update(void) {
   //
   this->mPriv.pPixy->ccc.getBlocks();
   if(this->mPriv.pPixy->ccc.numBlocks <= 0) {
-    r = (CONNECT_FAILED | INVALID_ANSWER | ERROR_BREAK_OUT);
+    r |= CONNECT_FAILED | INVALID_ANSWER | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
     return r;
   }
