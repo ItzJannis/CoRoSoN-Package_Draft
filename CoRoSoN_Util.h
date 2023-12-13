@@ -46,7 +46,7 @@
 *  Types
 *
 *********************************************************************/
-#define ERRORS byte 
+typedef byte ERRORS;
 //
 // use this as the default return type for functions 
 // that a coding newbie would declare as void 
