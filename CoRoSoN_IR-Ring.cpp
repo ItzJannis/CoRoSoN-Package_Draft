@@ -64,11 +64,11 @@ ERRORS IRRing::Update() {
     DEBUG_ERRORS(r);
     return r;
   }
+  // Default: not seen
+  this->mPriv.SeesBall      = false;
+  this->mPriv.BallDirection = - 8;
   this->mPriv.BallDistance  =  aAnswer[0] / 16;
-  if(this->mPriv.BallDistance == 0) {
-    this->mPriv.SeesBall      = false;
-    this->mPriv.BallDirection = - 8;
-  } else {
+  if(this->mPriv.BallDistance != 0) {
     this->mPriv.SeesBall      = true;
     this->mPriv.BallDirection = (aAnswer[0] % 16) - 7;
   }

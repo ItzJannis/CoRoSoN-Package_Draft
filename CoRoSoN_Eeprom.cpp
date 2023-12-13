@@ -37,9 +37,7 @@
 *  Implementations
 *
 *********************************************************************/
-unsigned int _Address = 0;
-
-
+static unsigned int _Address = 0;
 
 ERRORS EEPROM_Init(unsigned int Address) {
   _Address = Address;

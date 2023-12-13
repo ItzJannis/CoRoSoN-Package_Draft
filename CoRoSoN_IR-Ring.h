@@ -95,7 +95,7 @@ public:
   *   
   * * Description:
   *     Returns the distance of the ball to the robot
-  *     1 = closest, 15 = furthest
+  *     1 = closest,..., 15 = furthest
   * 
   * ! Additional information:
   *     Returns 0 if ball is not seen

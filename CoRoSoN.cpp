@@ -45,9 +45,7 @@ static byte _LEDModule2Right = 0;
 ERRORS CoRoSoN_Init() {
   ERRORS r;
   int    i;
-  //
-  // Variable init
-  //
+  
   r = OKAY;
   i = 0;
   //
