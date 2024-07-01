@@ -7,6 +7,7 @@ void setup() {
 
 void loop() {
   ERRORS Errors = OKAY; // start with everything okay
+  
   DEBUG_PRINT(Errors);
   // create bitmap to show which errors occured
   Errors = ERROR_BREAK_OUT | PROCESS_RUNNING | INVALID_CONFIG | CONNECT_FAILED;

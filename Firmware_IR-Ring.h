@@ -23,34 +23,29 @@
 * 
 *********************************************************************/
 // -------------------------------------------------------------------
-// File:    CoRoSoN_Eeprom.h
-// Purpose: Providing usefull utility functions to make use of the 
-//          ESP32's eeprom
-//            i.e. save last robot state to restart into it after reset
+// File:    Firmware_IR-Ring.h
+// Purpose: Main header for the firmware to load onto ir ring
 // -------------------------------------------------------------------
-#ifndef COROSON_EEPROM_H
-#define COROSON_EEPROM_H
+#ifndef FIRMWARE_IR_RING_H
+#define FIRMWARE_IR_RING_H
 /*********************************************************************
 * 
 *  Dependencies
 *
 *********************************************************************/
 #include <Arduino.h>
-#include <EEPROM.h>
 #include "CoRoSoN_Util.h"
+#include "CoRoSoN_I2C.h"
 /*********************************************************************
 * 
-*  Types
+*  Config
 *
 *********************************************************************/
-//
-// Modifiy this struct for the eeprom interactions 
-// to read / write data however you like
-//
-struct EEPROM_DATA {
-  bool IsInStandby;
-  // add what you want to store here
-};
+#define NUM_SENSORS (16)
+#define BLUR_ORIGINAL_VALUE_WEIGHT (0.6) // ! keep inside ]0;1[
+#define MIN_VALUE_TO_DETECT (TODO SET MIN_VALUE_TO_DETECT AFTER TESTING)
+// direction:                                    -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
+const unsigned short SENSOR_PINS[NUM_SENSORS] = {13, 15, 02, 04, 17, 05, 18, 19, 34, 35, 32, 33, 25, 26, 27, 14};
 /*********************************************************************
 * 
 *  Functions
@@ -58,30 +53,22 @@ struct EEPROM_DATA {
 *********************************************************************/
 /************************************************************
 *
-* ! [SETUP]
-* ? EEPROM_Init()
+* ? Setup()
 *   
 * * Description:
-*     Initializes the ESP32's eeprom
+*     Call this function in arduino's setup on ir ring to
+*     setup everything correctly 
 *
 ************************************************************/
-ERRORS EEPROM_Init(unsigned short Address);
+ERROR Setup(void);
 /************************************************************
 *
-* ? EEPROM_Read()
+* ? Loop()
 *   
 * * Description:
-*     reads the currently in the eeprom stored EEPROM_DATA
+*     Call this function in arduino's loop to read the 
+*     current sensor situation
 *
 ************************************************************/
-EEPROM_DATA EEPROM_Read();
-/************************************************************
-*
-* ? EEPROM_Write()
-*   
-* * Description:
-*     Writes the passed EEPROM_DATA to the eeprom
-*
-************************************************************/
-ERRORS EEPROM_Write(const EEPROM_DATA& Data);
-#endif // COROSON_EEPROM_H
+void Loop(void);
+#endif // FIRMWARE_IR_RING_H

@@ -36,7 +36,6 @@
 #include <Arduino.h>
 #include "CoRoSoN_Util.h"
 #include "CoRoSoN_I2C.h"
-#include "CoRoSoN_IR-Ring.h"
 /*********************************************************************
 * 
 *  Types
@@ -105,6 +104,7 @@ public:
   ************************************************************/
   int  BallDistance(void);
 private:
+
   struct {
     unsigned short Address;
              bool  SeesBall;

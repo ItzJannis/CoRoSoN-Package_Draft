@@ -51,7 +51,7 @@
 *     the given data and clock pin
 *
 ************************************************************/
-ERRORS I2C_Init(unsigned int SerialDataPin, unsigned int SerialClockPin);
+ERRORS I2C_Init(unsigned short SerialDataPin, unsigned short SerialClockPin);
 /************************************************************
 *
 * ? I2C_TestConnection()
@@ -60,7 +60,7 @@ ERRORS I2C_Init(unsigned int SerialDataPin, unsigned int SerialClockPin);
 *     Tests if connection to the given address is possible
 *
 ************************************************************/
-ERRORS I2C_TestConnection(int Address);
+ERRORS I2C_TestConnection(unsigned short Address);
 /************************************************************
 *
 * ? I2C_Write()
@@ -69,7 +69,7 @@ ERRORS I2C_TestConnection(int Address);
 *     Writes the passed Data byte per byte to the given address
 *
 ************************************************************/
-ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes);
+ERRORS I2C_Write(unsigned short Address, byte aMessageBytes[], unsigned int NumBytes);
 /************************************************************
 *
 * ? I2C_ReadBlocking()
@@ -84,5 +84,5 @@ ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes);
 *     passed byte array
 *
 ************************************************************/
-ERRORS I2C_ReadBlocking(int Address, byte aAnswerBytes[], unsigned int NumBytes);
+ERRORS I2C_ReadBlocking(unsigned short Address, byte aAnswerBytes[], unsigned int NumBytes);
 #endif // COROSON_I2C_H

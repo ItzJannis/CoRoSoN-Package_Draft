@@ -54,7 +54,7 @@ IRRing::IRRing(unsigned short Address) {
 
 ERRORS IRRing::Update() {
   ERRORS r;
-  byte    aAnswer[1];
+  byte   aAnswer[2];
 
   r = OKAY;
   ZEROMEM(aAnswer);
@@ -67,10 +67,10 @@ ERRORS IRRing::Update() {
   // Default: not seen
   this->mPriv.SeesBall      = false;
   this->mPriv.BallDirection = - 8;
-  this->mPriv.BallDistance  =  aAnswer[0] / 16;
+  this->mPriv.BallDirection = aAnswer[1];
   if(this->mPriv.BallDistance != 0) {
     this->mPriv.SeesBall      = true;
-    this->mPriv.BallDirection = (aAnswer[0] % 16) - 7;
+    this->mPriv.BallDirection = aAnswer[0] - 128;
   }
   return r;
 }

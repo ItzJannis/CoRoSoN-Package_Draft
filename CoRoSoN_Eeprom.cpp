@@ -37,9 +37,9 @@
 *  Implementations
 *
 *********************************************************************/
-static unsigned int _Address = 0;
+static unsigned short _Address = 0;
 
-ERRORS EEPROM_Init(unsigned int Address) {
+ERRORS EEPROM_Init(unsigned short Address) {
   _Address = Address;
   if (!EEPROM.begin(sizeof(EEPROM_DATA))) {
     return (CONNECT_FAILED | ERROR_BREAK_OUT);

@@ -37,29 +37,29 @@
 *  Implementations
 *
 *********************************************************************/
-static bool _InitSuccessful = false;
+static bool _InitSuccessfull = false;
 
 static void _CheckInit(void) {
-  if(!_InitSuccessful) {
+  if(!_InitSuccessfull) {
     DEBUG_BLOCK("I2C_Init() was not called to set data and clock pin before using I2C", 1000);
   }
 }
 
-ERRORS I2C_Init(unsigned int SerialDataPin, unsigned int SerialClockPin) {
+ERRORS I2C_Init(unsigned short SerialDataPin, unsigned short SerialClockPin) {
   ERRORS r;
 
-  ZEROMEM(r);
+  r = OKAY;
   if(!Wire.begin(SerialDataPin, SerialClockPin)) {
     r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
     DEBUG_BLOCK("I2C-Bus konnte nicht gestartet werden", 1000);
   } else {
-    _InitSuccessful = true;
+    _InitSuccessfull = true;
   }
   return r;
 }
 
-ERRORS I2C_TestConnection(int Address) {
+ERRORS I2C_TestConnection(unsigned short Address) {
   ERRORS r;
 
   r = OKAY;
@@ -74,7 +74,7 @@ ERRORS I2C_TestConnection(int Address) {
   return r;
 }
 
-ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
+ERRORS I2C_Write(unsigned short Address, byte aMessageBytes[], unsigned int NumBytes) {
   ERRORS r;
   int    MessageLength;
 
@@ -103,7 +103,7 @@ ERRORS I2C_Write(int Address, byte aMessageBytes[], unsigned int NumBytes) {
   return r;
 }
 
-ERRORS I2C_ReadBlocking(int Address, byte aAnswerBytes[], unsigned int NumBytes) {
+ERRORS I2C_ReadBlocking(unsigned short Address, byte aAnswerBytes[], unsigned int NumBytes) {
   ERRORS r;
   int    AnswerLength;
 
