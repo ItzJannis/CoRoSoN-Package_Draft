@@ -42,7 +42,8 @@ static byte _LastBallDir = 0;
 static byte _LastBallDist = 0;
 static bool _InitSuccessfull = false;
 
-static void _OnReceive(void) {
+static void _OnReceive(int n) {
+  (void)n; // not needed
   while(Wire.available()) {
     Wire.read(); // read and forget
   }
@@ -88,7 +89,7 @@ void Loop() {
   double Sum;
 
   _CheckInit();
-  ZEROMEM(_aValues);
+  ZEROMEM(_aRawValues);
   //
   // Read sensors
   //

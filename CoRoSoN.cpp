@@ -95,14 +95,14 @@ ERRORS CoRoSoN_Init() {
   ledcAttachPin(MOTOR_2_PWM, MOTOR_2);
   ledcAttachPin(MOTOR_3_PWM, MOTOR_3);
   ledcAttachPin(MOTOR_4_PWM, MOTOR_4);
-  for(i = 1; i <= 4; i++) {
-    r = ledcSetup(i, 1000, 8);
-    if(r) {
-      r |= ERROR_IGNORED;
-      DEBUG_ERRORS(r);
-    }
-    ledcWrite(i, 0);
-  }
+  ledcAttach(MOTOR_1_PWM, 1000, 8);
+  ledcAttach(MOTOR_2_PWM, 1000, 8);
+  ledcAttach(MOTOR_3_PWM, 1000, 8);
+  ledcAttach(MOTOR_4_PWM, 1000, 8);
+  ledcWrite(MOTOR_1_PWM, 0);
+  ledcWrite(MOTOR_2_PWM, 0);
+  ledcWrite(MOTOR_3_PWM, 0);
+  ledcWrite(MOTOR_4_PWM, 0);
   return r;
 }
 
