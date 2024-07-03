@@ -59,7 +59,7 @@ const unsigned short SENSOR_PINS[NUM_SENSORS] = {13, 15, 02, 04, 17, 05, 18, 19,
 *     setup everything correctly 
 *
 ************************************************************/
-ERROR Setup(void);
+ERRORS Setup(void);
 /************************************************************
 *
 * ? Loop()
