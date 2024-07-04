@@ -89,7 +89,7 @@ void Loop() {
   double Sum;
 
   _CheckInit();
-  ZEROMEM(_aRawValues);
+  ZEROMEM(aRawValues);
   //
   // Read sensors
   //
