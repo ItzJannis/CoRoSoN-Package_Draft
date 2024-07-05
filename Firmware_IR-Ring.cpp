@@ -120,7 +120,7 @@ void Loop() {
         iDir = i;
     }
   }
-  _LastBallDir = iDir - 7;
+  _LastBallDir = iDir;
   //
   // Calculate distribution by how wide 50% of the integral are spread around direction
   //
@@ -130,7 +130,7 @@ void Loop() {
     return;
   }
   Width50Percent = 0;
-  if(Sum > (0.5 * TotalSum)) {
+  if(Sum < (0.5 * TotalSum)) {
     for (int i = 1; i < NUM_SENSORS; i++) {
       if(Sum > (0.5 * TotalSum)) {
           Width50Percent = 2 * i;
