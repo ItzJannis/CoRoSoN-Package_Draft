@@ -81,8 +81,9 @@ ERRORS Setup() {
 
 void Loop() {
   elapsedMillis t;
-  int    aRawValues    [NUM_SENSORS];
-  double aBlurredValues[NUM_SENSORS];
+  int    aRawValues        [NUM_SENSORS];
+  double aBlurredValues    [NUM_SENSORS];
+  double aExpandedValues   [NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
   double TotalSum;
   int    iDir;
   int    Width50Percent;
@@ -90,33 +91,47 @@ void Loop() {
 
   _CheckInit();
   ZEROMEM(aRawValues);
+  ZEROMEM(aBlurredValues);
+  ZEROMEM(aExpandedValues);
   //
   // Read sensors
   //
   t = 0;
   while (t < 5) {// 5ms equal 6 runs of 833us each
-    for (int i = 0; i < NUM_SENSORS ; i++) {
+    for (int i = 0; i < ARRAY_LENGTH(aRawValues); i++) {
       aRawValues[i] += 1 - digitalRead(SENSOR_PINS[i]);                         
     }
   }
   //
   // Blur values
   //
-  TotalSum = 0.0;
-  for (int i = 0; i < NUM_SENSORS ; i++) {
-    int iLeft  = (i - 1 + NUM_SENSORS) % NUM_SENSORS;
-    int iRight = (i + 1) % NUM_SENSORS;
+  for (int i = 0; i < ARRAY_LENGTH(aRawValues) ; i++) {
+    int iLeft  = (i - 1 + ARRAY_LENGTH(aRawValues)) % ARRAY_LENGTH(aRawValues);
+    int iRight = (i + 1) % ARRAY_LENGTH(aRawValues);
     aBlurredValues[i]  = aRawValues[i]      * BLUR_ORIGINAL_VALUE_WEIGHT;
     aBlurredValues[i] += aRawValues[iLeft ] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT) / 2.0);
     aBlurredValues[i] += aRawValues[iRight] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT) / 2.0);
-    TotalSum += aBlurredValues[i];
+  }
+  //
+  // Expand values / increase resolution
+  //
+  for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
+    int iNext = (i + 1) % ARRAY_LENGTH(aBlurredValues);
+    double Delta = aBlurredValues[iNext] - aBlurredValues[i];
+    for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // linear interpolation
+      int iCurrent = ((i * EXPAND_FACTOR_PER_SENSOR) + j);
+      iCurrent += (EXPAND_FACTOR_PER_SENSOR / 2); // make sure middle is taken instead of most left
+      iCurrent  = iCurrent % ARRAY_LENGTH(aExpandedValues); // index wrap around
+      double Weight = (double)j / (double)EXPAND_FACTOR_PER_SENSOR;
+      aExpandedValues[iCurrent] = aBlurredValues[i] + (Weight * Delta);
+    }
   }
   //
   // Get direction by highest value
   //
   iDir = 0;
-  for (int i = 1; i < NUM_SENSORS ; i++) {
-    if (aBlurredValues[i] > aBlurredValues[iDir]) {
+  for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
+    if (aExpandedValues[i] > aExpandedValues[iDir]) {
         iDir = i;
     }
   }
@@ -124,22 +139,22 @@ void Loop() {
   //
   // Calculate distribution by how wide 50% of the integral are spread around direction
   //
-  Sum = aBlurredValues[iDir];
+  Sum = aExpandedValues[iDir];
   if(Sum < MIN_VALUE_TO_DETECT) {
     _LastBallDist = 0;
     return;
   }
   Width50Percent = 0;
   if(Sum < (0.5 * TotalSum)) {
-    for (int i = 1; i < NUM_SENSORS; i++) {
+    for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
       if(Sum > (0.5 * TotalSum)) {
           Width50Percent = 2 * i;
           break;
       }
-      int iLeft  = (iDir - i + NUM_SENSORS) % NUM_SENSORS;
-      int iRight = (iDir + i) % NUM_SENSORS;
-      Sum += aBlurredValues[iLeft] + aBlurredValues[iRight];
+      int iLeft  = (iDir - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
+      int iRight = (iDir + i) % ARRAY_LENGTH(aExpandedValues);
+      Sum += aExpandedValues[iLeft] + aExpandedValues[iRight];
     }
   }
-  _LastBallDist = (NUM_SENSORS - Width50Percent) * (NUM_SENSORS - Width50Percent);
+  _LastBallDist = ARRAY_LENGTH(aExpandedValues) - Width50Percent;
 }
