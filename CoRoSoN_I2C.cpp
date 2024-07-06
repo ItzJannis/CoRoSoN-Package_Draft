@@ -79,13 +79,7 @@ ERRORS I2C_Write(unsigned short Address, byte aMessageBytes[], unsigned int NumB
   int    MessageLength;
 
   r = OKAY;
-  if(ARRAY_LENGTH(aMessageBytes) != NumBytes) {
-    r |= INVALID_PARAMETER | ERROR_BREAK_OUT;
-    DEBUG_ERRORS(r);
-    DEBUG_PRINT(ARRAY_LENGTH(aMessageBytes));
-    DEBUG_PRINT(NumBytes);
-    return r;
-  }
+  ZEROMEM_N(aMessageBytes, NumBytes);
   _CheckInit();
   Wire.begin(Address);
   MessageLength = Wire.write(aMessageBytes, NumBytes);
@@ -108,14 +102,7 @@ ERRORS I2C_ReadBlocking(unsigned short Address, byte aAnswerBytes[], unsigned in
   int    AnswerLength;
 
   r = OKAY;
-  ZEROMEM(aAnswerBytes);
-  if(ARRAY_LENGTH(aAnswerBytes) != NumBytes) {
-    r |= INVALID_PARAMETER | ERROR_BREAK_OUT;
-    DEBUG_ERRORS(r);
-    DEBUG_PRINT(ARRAY_LENGTH(aAnswerBytes));
-    DEBUG_PRINT(NumBytes);
-    return r;
-  }
+  ZEROMEM_N(aAnswerBytes, NumBytes);
   _CheckInit();
   r = I2C_TestConnection(Address);
   if(r) {
