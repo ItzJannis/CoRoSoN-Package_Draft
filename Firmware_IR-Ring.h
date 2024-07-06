@@ -42,9 +42,9 @@
 *********************************************************************/
 #define NUM_SENSORS (16)
 #define BLUR_ORIGINAL_VALUE_WEIGHT (0.6) // ! keep inside ]0;1[ 
-#define EXPAND_FACTOR_PER_SENSOR (4) 
+#define EXPAND_FACTOR_PER_SENSOR (4) // ! keep inside [1;16] so that NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR is inside [NUM_SENSORS; 256]
 #define MIN_VALUE_TO_DETECT (TODO SET MIN_VALUE_TO_DETECT AFTER TESTING)
-// direction:                                    -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
+// "Direction":                                  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
 const unsigned short SENSOR_PINS[NUM_SENSORS] = {13, 15, 02, 04, 17, 05, 18, 19, 34, 35, 32, 33, 25, 26, 27, 14};
 /*********************************************************************
 * 
