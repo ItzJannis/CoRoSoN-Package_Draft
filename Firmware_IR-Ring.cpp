@@ -124,7 +124,7 @@ void Loop() {
   //      c = d0
   //      d = y0
   //
-  TotalSum = 0;
+  TotalSum = 0.0;
   for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
     int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValues);
     int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValues);
