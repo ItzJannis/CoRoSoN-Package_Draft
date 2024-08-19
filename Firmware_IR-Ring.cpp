@@ -164,7 +164,7 @@ void Loop() {
     _LastBallDist = 0;
     return;
   }
-  Width50Percent = 0;
+  Width50Percent = 1;
   if(Sum < (0.5 * TotalSum)) {
     for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
       if(Sum > (0.5 * TotalSum)) {

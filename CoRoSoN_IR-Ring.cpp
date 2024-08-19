@@ -43,7 +43,8 @@ IRRing::IRRing(unsigned short Address) {
 
   ZEROMEM(this->mPriv);
   this->mPriv.Address       = Address;
-  this->mPriv.BallDirection = - 8;
+  this->mPriv.BallDirection = -64;
+  this->mPriv.BallDistance  = 0;
   r = I2C_TestConnection(Address);
   if(r) {
     DEBUG_ERRORS(r);
@@ -66,11 +67,11 @@ ERRORS IRRing::Update() {
   }
   // Default: not seen
   this->mPriv.SeesBall      = false;
-  this->mPriv.BallDirection = - 8;
-  this->mPriv.BallDirection = aAnswer[1];
+  this->mPriv.BallDirection = -64;
+  this->mPriv.BallDistance  = aAnswer[1];
   if(this->mPriv.BallDistance != 0) {
     this->mPriv.SeesBall      = true;
-    this->mPriv.BallDirection = aAnswer[0] - 128;
+    this->mPriv.BallDirection = aAnswer[0] - 64;
   }
   return r;
 }

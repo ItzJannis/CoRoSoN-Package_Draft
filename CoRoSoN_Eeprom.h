@@ -73,7 +73,7 @@ ERRORS EEPROM_Init(unsigned short Address);
 * ? EEPROM_Read()
 *   
 * * Description:
-*     reads the currently in the eeprom stored EEPROM_DATA
+*     Reads the currently in the eeprom stored EEPROM_DATA
 *
 ************************************************************/
 EEPROM_DATA EEPROM_Read();

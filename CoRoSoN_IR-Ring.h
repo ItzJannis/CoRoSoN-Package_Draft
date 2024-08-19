@@ -80,17 +80,15 @@ public:
   * * Description:
   *     Returns the direction of the ball as follows:
   *       == 0: in front of robot
-  *        > 0: to the right of robot in 22.5° steps
-  *        < 0: to the left  of robot in 22.5° steps
+  *        > 0: to the right
+  *        < 0: to the left
   * 
   * ! Additional information:
-  *     Returns -8 if ball is not seen, 
-  *     therefore 180° or right behind robot is always +8
-  * 
-  * TODO: maybe change later with better code running on IR hardware
+  *     Returns -64 if ball is not seen, 
+  *     therefore 180° or right behind robot is always +64
   *
   ************************************************************/
-  int  BallDirection(void);
+  int BallDirection(void);
 
   /************************************************************
   *
@@ -98,15 +96,13 @@ public:
   *   
   * * Description:
   *     Returns the distance of the ball to the robot
-  *     1 = closest,..., 15 = furthest
+  *     1 = closest,..., 64 = furthest
   * 
   * ! Additional information:
   *     Returns 0 if ball is not seen
-  * 
-  * TODO: maybe change later with better code running on IR hardware
   *
   ************************************************************/
-  int  BallDistance(void);
+  int BallDistance(void);
 
 private:
   struct {

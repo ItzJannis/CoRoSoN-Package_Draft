@@ -114,7 +114,7 @@ enum ERROR_CODE : ERRORS {
   // Prints the different ERROR_CODE values the passed error is build off
   #define DEBUG_ERRORS(Errors) _DEBUG_ERRORS(ORIGIN, Errors)
   
-  // blocks the programm in an endless loop by epeatadly prints the passed massage every numMillis milliseconds
+  // Blocks the programm in an endless loop by epeatadly prints the passed massage every numMillis milliseconds
   #define DEBUG_BLOCK(Message, NumMillis) do { Serial.println(ORIGIN + Message); delay(NumMillis); } while(1)
 #else // COROSON_DEBUG
   // define all the debug functions as nothing if not in debug config
@@ -138,8 +138,8 @@ enum ERROR_CODE : ERRORS {
 #define ARRAY_LENGTH(Arr) (sizeof(Arr) / sizeof(*Arr))
 
 // Fills the bytes at the adress of the passed offset with 0's
-#define ZEROMEM  (Obj)         memset(&Obj, 0, sizeof(Obj))
-#define ZEROMEM_N(Obj, NBytes) memset(&Obj, 0, NBytes)
+#define ZEROMEM  (Obj)           memset(&Obj, 0, sizeof(Obj))
+#define ZEROMEM_N(Obj, NumBytes) memset(&Obj, 0, NumBytes)
 
 // 
 // Do not call these directly!

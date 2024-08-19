@@ -76,6 +76,7 @@ public:
   *
   ************************************************************/
   bool SeesGoal(void);
+
   /************************************************************
   *
   * ? SeesOwnGoal()
@@ -104,7 +105,7 @@ public:
   * ? DirectionOwnGoal()
   *   
   * * Description:
-  *     Returns if the own goal is seen
+  *     Returns the own goals directions in terms of pixels
   * 
   *     < 0 => own goal to the left
   *     > 0 => own goal to the right
