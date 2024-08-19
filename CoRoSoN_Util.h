@@ -40,7 +40,7 @@
 *  Configuration
 *
 *********************************************************************/
-#define COROSON_DEBUG // uncomment to shut off debug functionality
+#define COROSON_DEBUG // Uncomment to shut off debug functionality
 /*********************************************************************
 * 
 *  Types
@@ -48,7 +48,7 @@
 *********************************************************************/
 typedef byte ERRORS;
 //
-// use this as the default return type for functions 
+// Use this as the default return type for functions 
 // that a coding newbie would declare as void 
 // to provide a way to check for errors and handle them
 //
@@ -102,19 +102,18 @@ enum ERROR_CODE : ERRORS {
 *
 *********************************************************************/
 #ifdef COROSON_DEBUG
-  //
   // name of the current file as a native C String (char* / "text")
   #define FILENAME (strrchr(__FILE__, '/') ? (strrchr(__FILE__, '/') + 1) : __FILE__)
-  //
+  
   // String (arduino type) concatinating current filename and current line into a verbose origin string for debug outputs
   #define ORIGIN String(String(FILENAME) + " in " + String(__PRETTY_FUNCTION__) + " at line " + String(__LINE__) + " : ")
-  //
+  
   // Prints the value passed in a verbose string to the serial monitor inlcuding origin of print and variable name
   #define DEBUG_PRINT(Variable) Serial.println(ORIGIN + String(#Variable) + " = " + String(Variable))
-  //
+  
   // Prints the different ERROR_CODE values the passed error is build off
   #define DEBUG_ERRORS(Errors) _DEBUG_ERRORS(ORIGIN, Errors)
-  //
+  
   // blocks the programm in an endless loop by epeatadly prints the passed massage every numMillis milliseconds
   #define DEBUG_BLOCK(Message, NumMillis) do { Serial.println(ORIGIN + Message); delay(NumMillis); } while(1)
 #else // COROSON_DEBUG
@@ -125,22 +124,23 @@ enum ERROR_CODE : ERRORS {
   #define DEBUG_ERRORS(Errors)
   #define DEBUG_BLOCK(Message, NumMillis)
 #endif // COROSON_DEBUG
-//
+
 // Returns the smaller one of the two values
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-//
+
 // Returns the bigger one of the two values
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
-//
+
 // Returns the absolute value of the passed argument (works with all number types)
 #define ABS(X) ((X) < 0 ? -(X) : (X))
-//
+
 // Returns the number of elements in the passed array
 #define ARRAY_LENGTH(Arr) (sizeof(Arr) / sizeof(*Arr))
-//
+
 // Fills the bytes at the adress of the passed offset with 0's
-#define ZEROMEM(Obj)          memset(&Obj, 0, sizeof(Obj))
+#define ZEROMEM  (Obj)         memset(&Obj, 0, sizeof(Obj))
 #define ZEROMEM_N(Obj, NBytes) memset(&Obj, 0, NBytes)
+
 // 
 // Do not call these directly!
 //

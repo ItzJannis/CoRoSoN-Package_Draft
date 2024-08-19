@@ -51,6 +51,7 @@ struct EEPROM_DATA {
   bool IsInStandby;
   // add what you want to store here
 };
+
 /*********************************************************************
 * 
 *  Functions
@@ -66,6 +67,7 @@ struct EEPROM_DATA {
 *
 ************************************************************/
 ERRORS EEPROM_Init(unsigned short Address);
+
 /************************************************************
 *
 * ? EEPROM_Read()
@@ -75,6 +77,7 @@ ERRORS EEPROM_Init(unsigned short Address);
 *
 ************************************************************/
 EEPROM_DATA EEPROM_Read();
+
 /************************************************************
 *
 * ? EEPROM_Write()

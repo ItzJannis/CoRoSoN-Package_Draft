@@ -52,6 +52,7 @@
 *
 ************************************************************/
 ERRORS I2C_Init(unsigned short SerialDataPin, unsigned short SerialClockPin);
+
 /************************************************************
 *
 * ? I2C_TestConnection()
@@ -61,6 +62,7 @@ ERRORS I2C_Init(unsigned short SerialDataPin, unsigned short SerialClockPin);
 *
 ************************************************************/
 ERRORS I2C_TestConnection(unsigned short Address);
+
 /************************************************************
 *
 * ? I2C_Write()
@@ -70,6 +72,7 @@ ERRORS I2C_TestConnection(unsigned short Address);
 *
 ************************************************************/
 ERRORS I2C_Write(unsigned short Address, byte aMessageBytes[], unsigned int NumBytes);
+
 /************************************************************
 *
 * ? I2C_ReadBlocking()

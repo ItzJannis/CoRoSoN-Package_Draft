@@ -145,6 +145,7 @@ enum DIRECTION : int {
 *
 ************************************************************/
 ERRORS CoRoSoN_Init(void);
+
 /************************************************************
 *
 * ? CoRoSoN_SetLEDColor()
@@ -154,6 +155,7 @@ ERRORS CoRoSoN_Init(void);
 *
 ************************************************************/
 ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Color);
+
 /************************************************************
 *
 * ? CoRoSoN_ButtonIsPressed()
@@ -166,6 +168,7 @@ ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Col
 *
 ************************************************************/
 bool CoRoSoN_ButtonIsPressed(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side);
+
 /************************************************************
 *
 * ? CoRoSoN_SetMotor()
