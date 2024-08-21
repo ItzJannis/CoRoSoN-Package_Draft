@@ -118,7 +118,7 @@ ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Col
     case I2C_MODULE_1: 
       switch(Side) {
         case LEFT : 
-          _LEDModule1Left  = bColor * 2; 
+          _LEDModule1Left = bColor * 2; 
           break;
         case RIGHT: bColor *= 16; 
           if(bColor > 63) {

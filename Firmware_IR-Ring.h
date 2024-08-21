@@ -24,7 +24,9 @@
 *********************************************************************/
 // -------------------------------------------------------------------
 // File:    Firmware_IR-Ring.h
-// Purpose: Main header for the firmware to load onto ir ring
+// Purpose: Providing an all-in-one solution for the IR ring 
+//          to convert the TSSP sensor values to usefull 
+//          direction and distance of the ball available via I2C
 // -------------------------------------------------------------------
 #ifndef FIRMWARE_IR_RING_H
 #define FIRMWARE_IR_RING_H
