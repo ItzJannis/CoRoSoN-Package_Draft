@@ -33,6 +33,7 @@
 *********************************************************************/
 #include "Firmware_IR-Ring.h"
 #include <elapsedMillis.h>
+#include <Math.h>
 /*********************************************************************
 * 
 *  Implementations
@@ -40,7 +41,10 @@
 *********************************************************************/
 static byte _LastBallDir = 0;
 static byte _LastBallDist = 0;
-static bool _InitSuccessfull = false;
+static bool _SetupSuccessfull = false;
+static long double _aFactorX[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // X: left to right in robot view
+static long double _aFactorY[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // Y: behind to front in robot view
+static long double _AngleStep_rad = 2.0 * PI / (long double)(NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR);
 
 static void _OnReceive(int n) {
   (void)n; // not needed
@@ -54,17 +58,18 @@ static void _OnRequest(void) {
   Wire.write(_LastBallDist);
 }
 
-static void _CheckInit(void) {
-  if(!_InitSuccessfull) {
+static void _CheckSetup(void) {
+  if(!_SetupSuccessfull) {
     DEBUG_BLOCK("Setup() was not called to set data and clock pin before using I2C", 1000);
   }
 }
 
 ERRORS Setup() {
-  ERRORS r = OKAY;
+  ERRORS r;
 
+  r = OKAY;
   Serial.begin(115200);
-  for(int i = 0; i < NUM_SENSORS; i++) {
+  for(int i = 0; i < ARRAY_LENGTH(SENSOR_PINS); i++) {
     pinMode(SENSOR_PINS[i], INPUT);
   }
   Wire.onRequest(_OnRequest);
@@ -74,22 +79,32 @@ ERRORS Setup() {
     DEBUG_ERRORS(r);
     DEBUG_BLOCK("I2C-Bus konnte nicht gestartet werden", 1000);
   } else {
-    _InitSuccessfull = true;
+    _SetupSuccessfull = true;
+  }
+  for(int i = 0; i < ARRAY_LENGTH(_aFactorX); i++) {
+    _aFactorX[i] = sin(_AngleStep_rad * (i - (ARRAY_LENGTH(_aFactorX) / 2) + 1)); // robot's x is math's y
+  }
+  for(int i = 0; i < ARRAY_LENGTH(_aFactorY); i++) {
+    _aFactorY[i] = cos(_AngleStep_rad * (i - (ARRAY_LENGTH(_aFactorY) / 2) + 1)); // robot's y is math's x
   }
   return r;
 }
 
 void Loop() {
   elapsedMillis t;
-  int    aRawValues        [NUM_SENSORS];
-  double aBlurredValues    [NUM_SENSORS];
-  double aExpandedValues   [NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
+  int    aRawValues     [NUM_SENSORS];
+  double aBlurredValues [NUM_SENSORS];
+  double aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
   double TotalSum;
+  int    iMaximum;
+  double xDir;
+  double yDir;
+  double angleDir_rad;
   int    iDir;
   int    Width50Percent;
   double Sum;
 
-  _CheckInit();
+  _CheckSetup();
   ZEROMEM(aRawValues);
   ZEROMEM(aBlurredValues);
   ZEROMEM(aExpandedValues);
@@ -147,14 +162,25 @@ void Loop() {
     }
   }
   //
-  // Get direction by highest value
+  // Get direction by vector addition in the quarter around highest value
   //
-  iDir = 0;
+  iMaximum = 0;
   for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
-    if (aExpandedValues[i] > aExpandedValues[iDir]) {
-        iDir = i;
+    if (aExpandedValues[i] > aExpandedValues[iMaximum]) {
+        iMaximum = i;
     }
   }
+  xDir = aExpandedValues[iMaximum] * _aFactorX[iMaximum];
+  yDir = aExpandedValues[iMaximum] * _aFactorY[iMaximum];
+  for (int i = 1; i < (ARRAY_LENGTH(aExpandedValues) / 8); i++) {
+    int iLeft = (iMaximum - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
+    int iRight = (iMaximum + i) % ARRAY_LENGTH(aExpandedValues);
+    xDir += (aExpandedValues[iLeft] * _aFactorX[iLeft]) + (aExpandedValues[iRight] * _aFactorX[iRight]);
+    yDir += (aExpandedValues[iLeft] * _aFactorY[iLeft]) + (aExpandedValues[iRight] * _aFactorY[iRight]);
+  }
+  angleDir_rad = atan2(xDir, yDir); // robot's x and y is swapped compared to math's
+  iDir = (int)((angleDir_rad / _AngleStep_rad) + 0.5); // + 0.5 for rounded division
+  iDir += (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
   _LastBallDir = iDir;
   //
   // Calculate distribution by how wide 50% of the integral are spread around direction
