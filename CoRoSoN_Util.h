@@ -138,7 +138,7 @@ enum ERROR_CODE : ERRORS {
 #define ARRAY_LENGTH(Arr) (sizeof(Arr) / sizeof(*Arr))
 
 // Fills the bytes at the adress of the passed offset with 0's
-#define ZEROMEM  (Obj)           memset(&Obj, 0, sizeof(Obj))
+#define ZEROMEM(Obj) memset(&Obj, 0, sizeof(Obj))
 #define ZEROMEM_N(Obj, NumBytes) memset(&Obj, 0, NumBytes)
 
 // 
