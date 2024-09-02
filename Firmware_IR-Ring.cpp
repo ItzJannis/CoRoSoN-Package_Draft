@@ -36,6 +36,37 @@
 #include <Math.h>
 /*********************************************************************
 * 
+*  Config Check
+*
+*********************************************************************/
+//
+// BLUR_ORIGINAL_VALUE_WEIGHT
+#if (BLUR_ORIGINAL_VALUE_WEIGHT <= 0.0)
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must be greater than 0.0"
+#elif (BLUR_ORIGINAL_VALUE_WEIGHT >= 1.0)
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must be less than 1.0"
+#endif
+//
+// EXPAND_FACTOR_PER_SENSOR
+#if (EXPAND_FACTOR_PER_SENSOR <= 0)
+  #error "Config-Error: EXPAND_FACTOR_PER_SENSOR must be greater than 0"
+#elif (EXPAND_FACTOR_PER_SENSOR > (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR))
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must not be greater than (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
+#endif
+//
+// VECTOR_ADDITION_SENSOR_COUNT
+#if (VECTOR_ADDITION_SENSOR_COUNT <= 0)
+  #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be greater than 0"
+#elif (VECTOR_ADDITION_SENSOR_COUNT >= 17)
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must be less than 17"
+#endif
+//
+// MIN_VALUE_TO_DETECT
+#if (MIN_VALUE_TO_DETECT <= 0)
+  #error "Config-Error: MIN_VALUE_TO_DETECT must be greater than 0"
+#endif
+/*********************************************************************
+* 
 *  Implementations
 *
 *********************************************************************/
@@ -172,11 +203,17 @@ void Loop() {
   }
   xDir = aExpandedValues[iMaximum] * _aFactorX[iMaximum];
   yDir = aExpandedValues[iMaximum] * _aFactorY[iMaximum];
-  for (int i = 1; i < (ARRAY_LENGTH(aExpandedValues) / 8); i++) {
+  for (int i = 1; i < (VECTOR_ADDITION_SENSOR_COUNT - 1) / 2; i++) {
     int iLeft = (iMaximum - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
     int iRight = (iMaximum + i) % ARRAY_LENGTH(aExpandedValues);
     xDir += (aExpandedValues[iLeft] * _aFactorX[iLeft]) + (aExpandedValues[iRight] * _aFactorX[iRight]);
     yDir += (aExpandedValues[iLeft] * _aFactorY[iLeft]) + (aExpandedValues[iRight] * _aFactorY[iRight]);
+  }
+  if(VECTOR_ADDITION_SENSOR_COUNT % 2 == 0 ) { // ensure added vectors are centered around maximum
+    int iLeft  = (iMaximum - (VECTOR_ADDITION_SENSOR_COUNT / 2) + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
+    int iRight = (iMaximum + (VECTOR_ADDITION_SENSOR_COUNT / 2)) % ARRAY_LENGTH(aExpandedValues);
+    xDir += (0.5 * aExpandedValues[iLeft] * _aFactorX[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorX[iRight]);
+    yDir += (0.5 * aExpandedValues[iLeft] * _aFactorY[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorY[iRight]);
   }
   angleDir_rad = atan2(xDir, yDir); // robot's x and y is swapped compared to math's
   iDir = (int)((angleDir_rad / _AngleStep_rad) + 0.5); // + 0.5 for rounded division

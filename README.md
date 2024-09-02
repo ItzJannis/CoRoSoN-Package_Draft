@@ -217,6 +217,9 @@ This firmware basically does:
 1. Read all physical signals
 2. Gaussian blur on each sensors value with its 2 neighbouring values
 3. Expand values to higher resolution by using cubic interpolation
+4. Find highest value
+5. Vector addition around highest value for precise direction
+6. Determine distance by numeric integration
 >#### NUM_SENSORS
 Number of physical TSSP sensors for the rotational-symmetric evaluation
 >#### BLUR_ORIGINAL_VALUE_WEIGHT
@@ -227,6 +230,12 @@ Must be a value greater than 0 and less than 1
 Factor by which the values should be expanded in step 3 \
 **Attention:** \
 Must be an integer from 1 to 16 (both inclusive)
+>#### VECTOR_ADDITION_SENSOR_COUNT
+Amount of sensors used for sensor addition
+**Attention:** \
+Must be an integer from 1 to (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR) (both inclusive)
+>#### MIN_VALUE_TO_DETECT
+Value the maximum found in step 4 has to have to count as a detected ball
 >#### const unsigned short SENSOR_PINS\[NUM_SENSORS\]
 Pins for the NUM_SENSORS physical TSSP sensors
 >#### ERRORS Setup(void)
