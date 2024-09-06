@@ -220,7 +220,7 @@ void Loop() {
   iDir += (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
   _LastBallDir = iDir;
   //
-  // Calculate distribution by how wide 50% of the integral are spread around direction
+  // Calculate distribution by how wide 50% of the integral area spread around direction
   //
   Sum = aExpandedValues[iDir];
   if(Sum < MIN_VALUE_TO_DETECT) {
