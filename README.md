@@ -140,10 +140,8 @@ Returns the direction of the heading related to the current state \
 < 0 => heading left  / turned to the right \
 \> 0 => heading right / turned to the left 
 
-### CoRoSoN
-Including this file gives you everything CoRoSoN has to offer for your main board. \
-Based on the content included by this file you should be able to built your first RoboCup Soccer Robot.
-
+### CoRoSoN_Config
+This file defines the hardware configuration of the CoRoSoN kit needed for the software.
 #### Configuration
 ##### I2C bus
 >###### I2C_SDA
@@ -162,6 +160,10 @@ I2C base address for button and led modules
 Binary address encoded by soldering on the first module itself
 >###### I2C_BTNLED_CODE_2
 Binary address encoded by soldering on the second module itself
+
+### CoRoSoN
+Including this file gives you everything CoRoSoN has to offer for your main board. \
+Based on the content included by this file you should be able to built your first RoboCup Soccer Robot.
 ##### Motor
 CoRoSoN supports driving with up to 4 motors. If less than 4 are used the once with the highest numbers are ignored.
 >###### MOTOR_ENA
