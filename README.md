@@ -224,7 +224,7 @@ This firmware basically does:
 6. Determine distance by numeric integration
 >#### NUM_SENSORS
 Number of physical TSSP sensors for the rotational-symmetric evaluation
->#### BLUR_ORIGINAL_VALUE_WEIGHT
+>#### BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE
 Weight for the original value in step 2 (gaussian blur) \
 **Attention:** \
 Must be a value greater than 0 and less than 1

@@ -47,7 +47,7 @@
 // Software Config
 //
 #define NUM_SENSORS (16)
-#define BLUR_ORIGINAL_VALUE_WEIGHT (0.6) // ! keep inside ]0;1[ 
+#define BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE (60) // ! keep inside ]0;100[ 
 #define EXPAND_FACTOR_PER_SENSOR (4) // ! keep inside [1;16] so that NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR is inside [NUM_SENSORS; 256]
 #define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 4) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
 #define MIN_VALUE_TO_DETECT (50)

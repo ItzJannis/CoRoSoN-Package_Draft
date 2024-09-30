@@ -34,31 +34,32 @@
 #include "Firmware_IR-Ring.h"
 #include <elapsedMillis.h>
 #include <Math.h>
+#include <Wire.h>
 /*********************************************************************
 * 
 *  Config Check
 *
 *********************************************************************/
 //
-// BLUR_ORIGINAL_VALUE_WEIGHT
-#if (BLUR_ORIGINAL_VALUE_WEIGHT <= 0.0)
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must be greater than 0.0"
-#elif (BLUR_ORIGINAL_VALUE_WEIGHT >= 1.0)
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must be less than 1.0"
+// BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE
+#if (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE <= 0)
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be greater than 0"
+#elif (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE >= 100)
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be less than 100"
 #endif
 //
 // EXPAND_FACTOR_PER_SENSOR
 #if (EXPAND_FACTOR_PER_SENSOR <= 0)
   #error "Config-Error: EXPAND_FACTOR_PER_SENSOR must be greater than 0"
 #elif (EXPAND_FACTOR_PER_SENSOR > (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR))
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must not be greater than (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must not be greater than (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
 #endif
 //
 // VECTOR_ADDITION_SENSOR_COUNT
 #if (VECTOR_ADDITION_SENSOR_COUNT <= 0)
   #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be greater than 0"
 #elif (VECTOR_ADDITION_SENSOR_COUNT >= 17)
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT must be less than 17"
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be less than 17"
 #endif
 //
 // MIN_VALUE_TO_DETECT
@@ -154,9 +155,9 @@ void Loop() {
   for (int i = 0; i < ARRAY_LENGTH(aRawValues) ; i++) {
     int iLeft  = (i - 1 + ARRAY_LENGTH(aRawValues)) % ARRAY_LENGTH(aRawValues);
     int iRight = (i + 1) % ARRAY_LENGTH(aRawValues);
-    aBlurredValues[i]  = (double)aRawValues[i]      * BLUR_ORIGINAL_VALUE_WEIGHT;
-    aBlurredValues[i] += (double)aRawValues[iLeft ] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT) / 2.0);
-    aBlurredValues[i] += (double)aRawValues[iRight] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT) / 2.0);
+    aBlurredValues[i]  = (double)aRawValues[i]      * BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
+    aBlurredValues[i] += (double)aRawValues[iLeft ] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0);
+    aBlurredValues[i] += (double)aRawValues[iRight] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0);
   }
   //
   // Expand values by cubic interpolation:
