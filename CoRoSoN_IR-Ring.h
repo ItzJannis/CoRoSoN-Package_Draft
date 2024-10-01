@@ -84,8 +84,8 @@ public:
   *        < 0: to the left
   * 
   * ! Additional information:
-  *     Returns -64 if ball is not seen, 
-  *     therefore 180° or right behind robot is always +64
+  *     Returns -32 if ball is not seen, 
+  *     therefore 180° or right behind robot is always +32
   *
   ************************************************************/
   int BallDirection(void);
