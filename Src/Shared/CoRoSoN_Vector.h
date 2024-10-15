@@ -26,6 +26,26 @@
 // File:    CoRoSoN_Vector.h
 // Purpose: Providing a vector class for easy use
 // -------------------------------------------------------------------
+// Users Guide:
+//          This vector header is optimized for the RoboCupJunior Soccer
+//          therefore the way of thinking about directions is provided 
+//          here:
+//                    ^ x
+//                    |           
+//                    |     @1
+//                    |   /
+//                    | /
+//          ----------|----------> y
+//                  / |
+//                /   |
+//               @2   |
+//                    
+//          The diagram shows that this header provides a view
+//          in which the axis from back to front of the robot is 
+//          the x-axis and the axis from left to right is the y-axis
+//          therefore also @1 has an angle value of around +45° 
+//          and @2 of around -135°
+// -------------------------------------------------------------------
 #ifndef COROSON_VECTOR_H
 #define COROSON_VECTOR_H
 /*********************************************************************
