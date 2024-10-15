@@ -23,39 +23,35 @@
 * 
 *********************************************************************/
 // -------------------------------------------------------------------
-// File:    CoRoSoN_Pixy.h
-// Purpose: Providing a simpler, more beginner friendly interface
-//          to work with a Pixy cam
+// File:    CoRoSoN_IR-Ring.h
+// Purpose: Main header for the ir ring provided by CoRoSoN kit board
 // -------------------------------------------------------------------
-#ifndef COROSON_PIXY_H
-#define COROSON_PIXY_H
+#ifndef COROSON_IR_RING_H
+#define COROSON_IR_RING_H
 /*********************************************************************
 * 
 *  Dependencies
 *
 *********************************************************************/
 #include <Arduino.h>
-#include <Pixy2I2C.h>
-#include "CoRoSoN_Util.h"
+#include "../Shared/CoRoSoN_Util.h"
+#include "../Shared/CoRoSoN_I2C.h"
 /*********************************************************************
 * 
 *  Types
 *
 *********************************************************************/
-//
-// Pixy class
-//
-class Pixy {
+class IRRing {
 public:
   /************************************************************
   *
-  * ? Pixy()
+  * ? IRRing()
   *   
   * * Description:
   *     Constructor
   *
   ************************************************************/
-  Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
+  IRRing(unsigned short Address);
 
   /************************************************************
   *
@@ -69,60 +65,51 @@ public:
 
   /************************************************************
   *
-  * ? SeesGoal()
+  * ? SeesBall()
   *   
   * * Description:
-  *     Returns if the goal is seen
+  *     Returns if the ball is seen
   *
   ************************************************************/
-  bool SeesGoal(void);
+  bool SeesBall(void);
 
   /************************************************************
   *
-  * ? SeesOwnGoal()
+  * ? BallDirection()
   *   
   * * Description:
-  *     Returns if the own goal is seen
+  *     Returns the direction of the ball as follows:
+  *       == 0: in front of robot
+  *        > 0: to the right
+  *        < 0: to the left
+  * 
+  * ! Additional information:
+  *     Returns -32 if ball is not seen, 
+  *     therefore 180° or right behind robot is always +32
   *
   ************************************************************/
-  bool SeesOwnGoal(void);
-  
+  int BallDirection(void);
+
   /************************************************************
   *
-  * ? DirectionGoal()
+  * ? BallDistance()
   *   
   * * Description:
-  *     Returns the goals directions in terms of pixels
+  *     Returns the distance of the ball to the robot
+  *     1 = closest,..., 64 = furthest
   * 
-  *     < 0 => goal to the left
-  *     > 0 => goal to the right
+  * ! Additional information:
+  *     Returns 0 if ball is not seen
   *
   ************************************************************/
-  int DirectionGoal(void);
-  
-  /************************************************************
-  *
-  * ? DirectionOwnGoal()
-  *   
-  * * Description:
-  *     Returns the own goals directions in terms of pixels
-  * 
-  *     < 0 => own goal to the left
-  *     > 0 => own goal to the right
-  *
-  ************************************************************/
-  int DirectionOwnGoal(void);
-  
+  int BallDistance(void);
+
 private:
   struct {
-    Pixy2I2C*      pPixy;
     unsigned short Address;
-             int   SignatureGoal;
-             int   SignatureOwnGoal;
-             bool  SeesGoal;
-             bool  SeesOwnGoal;
-             int   DirectionGoal;
-             int   DirectionOwnGoal;
+             bool  SeesBall;
+             int   BallDirection;
+             int   BallDistance;
   } mPriv;
 };
-#endif // COROSON_PIXY_H
+#endif // COROSON_IR_RING_H

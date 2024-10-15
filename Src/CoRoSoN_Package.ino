@@ -1,4 +1,4 @@
-#include "CoRoSoN.h"
+#include "Main/CoRoSoN_Main.h"
 
 void setup() {
   Serial.begin(115200);

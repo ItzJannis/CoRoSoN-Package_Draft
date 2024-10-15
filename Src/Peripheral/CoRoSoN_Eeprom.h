@@ -23,39 +23,35 @@
 * 
 *********************************************************************/
 // -------------------------------------------------------------------
-// File:    Firmware_IR-Ring.h
-// Purpose: Providing an all-in-one solution for the IR ring 
-//          to convert the TSSP sensor values to usefull 
-//          direction and distance of the ball available via I2C
+// File:    CoRoSoN_Eeprom.h
+// Purpose: Providing usefull utility functions to make use of the 
+//          ESP32's eeprom
+//            i.e. save last robot state to restart into it after reset
 // -------------------------------------------------------------------
-#ifndef FIRMWARE_IR_RING_H
-#define FIRMWARE_IR_RING_H
+#ifndef COROSON_EEPROM_H
+#define COROSON_EEPROM_H
 /*********************************************************************
 * 
 *  Dependencies
 *
 *********************************************************************/
 #include <Arduino.h>
-#include "CoRoSoN_Util.h"
-#include "CoRoSoN_Config.h"
+#include <EEPROM.h>
+#include "../Shared/CoRoSoN_Util.h"
 /*********************************************************************
 * 
-*  Config
+*  Types
 *
 *********************************************************************/
 //
-// Software Config
+// Modifiy this struct for the eeprom interactions 
+// to read / write data however you like
 //
-#define NUM_SENSORS (16)
-#define BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE (60) // ! keep inside ]0;100[ 
-#define EXPAND_FACTOR_PER_SENSOR (4) // ! keep inside [1;16] so that NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR is inside [NUM_SENSORS; 256]
-#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 4) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
-#define MIN_VALUE_TO_DETECT (50)
-//
-// Hardware Config
-//
-// "Direction":                                  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
-const unsigned short SENSOR_PINS[NUM_SENSORS] = {14, 27, 26, 25, 33, 32, 35, 34, 19, 18, 05, 17, 04, 02, 15, 13};
+struct EEPROM_DATA {
+  bool IsInStandby;
+  // add what you want to store here
+};
+
 /*********************************************************************
 * 
 *  Functions
@@ -63,23 +59,32 @@ const unsigned short SENSOR_PINS[NUM_SENSORS] = {14, 27, 26, 25, 33, 32, 35, 34,
 *********************************************************************/
 /************************************************************
 *
-* ? Setup()
+* ! [SETUP]
+* ? EEPROM_Init()
 *   
 * * Description:
-*     Call this function in arduino's setup on ir ring to
-*     setup everything correctly 
+*     Initializes the ESP32's eeprom
 *
 ************************************************************/
-ERRORS Setup(void);
+ERRORS EEPROM_Init(unsigned short Address);
 
 /************************************************************
 *
-* ? Loop()
+* ? EEPROM_Read()
 *   
 * * Description:
-*     Call this function in arduino's loop to read the 
-*     current sensor situation
+*     Reads the currently in the eeprom stored EEPROM_DATA
 *
 ************************************************************/
-void Loop(void);
-#endif // FIRMWARE_IR_RING_H
+EEPROM_DATA EEPROM_Read();
+
+/************************************************************
+*
+* ? EEPROM_Write()
+*   
+* * Description:
+*     Writes the passed EEPROM_DATA to the eeprom
+*
+************************************************************/
+ERRORS EEPROM_Write(const EEPROM_DATA& Data);
+#endif // COROSON_EEPROM_H

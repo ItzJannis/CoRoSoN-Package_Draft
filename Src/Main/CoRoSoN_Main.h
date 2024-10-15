@@ -23,24 +23,24 @@
 * 
 *********************************************************************/
 // -------------------------------------------------------------------
-// File:    CoRoSoN.h
+// File:    CoRoSoN_Main.h
 // Purpose: Main header of CoRoSoN kit meant to run on the main board
 // -------------------------------------------------------------------
-#ifndef COROSON_H
-#define COROSON_H
+#ifndef COROSON_MAIN_H
+#define COROSON_MAIN_H
 /*********************************************************************
 * 
 *  Dependencies
 *
 *********************************************************************/
 #include <Arduino.h>
-#include "CoRoSoN_Util.h"
-#include "CoRoSoN_Eeprom.h"
-#include "CoRoSoN_I2C.h"
-#include "CoRoSoN_IR-Ring.h"
-#include "CoRoSoN_Pixy.h"
-#include "CoRoSoN_Compass.h"
-#include "CoRoSoN_Config.h"
+#include "../Peripheral/CoRoSoN_Eeprom.h"
+#include "../Peripheral/CoRoSoN_IR-Ring.h"
+#include "../Peripheral/CoRoSoN_Pixy.h"
+#include "../Peripheral/CoRoSoN_Compass.h"
+#include "../Shared/CoRoSoN_Util.h"
+#include "../Shared/CoRoSoN_Config.h"
+#include "../Shared/CoRoSoN_I2C.h"
 /*********************************************************************
 * 
 *  Types
@@ -141,4 +141,4 @@ bool CoRoSoN_ButtonIsPressed(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side);
 *
 ************************************************************/
 ERRORS CoRoSoN_SetMotor(MOTOR Motor, DIRECTION Direction, unsigned int SpeedPercentage);
-#endif // COROSON_H
+#endif // COROSON_MAIN_H

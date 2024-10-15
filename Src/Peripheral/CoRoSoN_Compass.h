@@ -36,8 +36,8 @@
 *********************************************************************/
 #include <Arduino.h>
 #include <Wire.h>
-#include "CoRoSoN_Util.h"
-#include "CoRoSoN_I2C.h"
+#include "../Shared/CoRoSoN_Util.h"
+#include "../Shared/CoRoSoN_I2C.h"
 /*********************************************************************
 * 
 *  Types
