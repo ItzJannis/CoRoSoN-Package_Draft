@@ -162,7 +162,7 @@ void Loop() {
   //
   // Expand values by cubic interpolation:
   //    Given: 
-  //      y0 := f(0), y1 := f(1), d0 := f'(0), d1 := f'(1)
+  //      y0 := f(x_i), y1 := f(x_(i+1)), d0 := f'(x_i), d1 := f'(x_(i+1))
   //    Task: 
   //      Find coefficients a, b, c, d of 3rd degree polynomial f
   //    Solution:
@@ -183,7 +183,7 @@ void Loop() {
     double b = - (3 * y0) + (3 * y1) - (2 * d0) - d1;
     double c = d0;
     double d = y0;
-    for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // linear interpolation
+    for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
       int iCurrent = ((i * EXPAND_FACTOR_PER_SENSOR) + j) % ARRAY_LENGTH(aExpandedValues);
       double Percentage = (double)j / (double)EXPAND_FACTOR_PER_SENSOR;
       aExpandedValues[iCurrent]  = a * Percentage * Percentage * Percentage;
@@ -226,6 +226,7 @@ void Loop() {
   Sum = aExpandedValues[iDir];
   if(Sum < MIN_VALUE_TO_DETECT) {
     _LastBallDist = 0;
+    _LastBallDir = 0;
     return;
   }
   Width50Percent = 1;
