@@ -144,7 +144,7 @@ void Loop() {
   // Read sensors
   //
   t = 0;
-  while (t < 5) {// 5ms equal 6 runs of 833us each
+  while (t < 5) { // 5ms equal 6 runs of 833us each
     for (int i = 0; i < ARRAY_LENGTH(aRawValues); i++) {
       aRawValues[i] += 1 - digitalRead(SENSOR_PINS[i]);                         
     }
@@ -155,14 +155,15 @@ void Loop() {
   for (int i = 0; i < ARRAY_LENGTH(aRawValues) ; i++) {
     int iLeft  = (i - 1 + ARRAY_LENGTH(aRawValues)) % ARRAY_LENGTH(aRawValues);
     int iRight = (i + 1) % ARRAY_LENGTH(aRawValues);
-    aBlurredValues[i]  = (double)aRawValues[i]      * BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
-    aBlurredValues[i] += (double)aRawValues[iLeft ] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0);
-    aBlurredValues[i] += (double)aRawValues[iRight] * ((1.0 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0);
+    aBlurredValues[i]  = (double)aRawValues[i]      * (double)BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
+    aBlurredValues[i] += (double)aRawValues[iLeft ] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
+    aBlurredValues[i] += (double)aRawValues[iRight] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
   }
   //
   // Expand values by cubic interpolation:
   //    Given: 
-  //      y0 := f(x_i), y1 := f(x_(i+1)), d0 := f'(x_i), d1 := f'(x_(i+1))
+  //      y0 := f (x_i), y1 := f (x_(i+1)),
+  //      d0 := f'(x_i), d1 := f'(x_(i+1))
   //    Task: 
   //      Find coefficients a, b, c, d of 3rd degree polynomial f
   //    Solution:
@@ -194,7 +195,7 @@ void Loop() {
     }
   }
   //
-  // Get direction by vector addition in the quarter around highest value
+  // Get direction by vector addition in the cone around highest value
   //
   iMaximum = 0;
   for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
@@ -225,8 +226,8 @@ void Loop() {
   //
   Sum = aExpandedValues[iDir];
   if(Sum < MIN_VALUE_TO_DETECT) {
-    _LastBallDist = 0;
     _LastBallDir = 0;
+    _LastBallDist = 0;
     return;
   }
   Width50Percent = 1;
