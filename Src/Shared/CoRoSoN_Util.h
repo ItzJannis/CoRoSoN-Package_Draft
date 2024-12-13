@@ -53,15 +53,15 @@ typedef byte ERRORS;
 // to provide a way to check for errors and handle them
 //
 enum ERROR_CODE : ERRORS {
-  OKAY              = 0b00000000, // no error occured
-  CONNECT_FAILED    = 0b00000001, // connection to device could not be established
-  INVALID_ANSWER    = 0b00000010, // answer of device does not match protocol
-  INVALID_PARAMETER = 0b00000100, // parameters do not match requirements (i.e. speed > 100%)
-  INVALID_CONFIG    = 0b00001000, // configuration does not match parameters request
-  PROCESS_RUNNING   = 0b00010000, // internal process still running or internal timer not yet ready (i.e. kick right after kick => cooling time not over)
-  ERROR_IGNORED     = 0b00100000, // error ignored, so no break out and no error handling happended
-  ERROR_HANDLED     = 0b01000000, // error handled and function continued with handled error (i.e. speed > 100% ==> speed = 100%)
-  ERROR_BREAK_OUT   = 0b10000000  // error could not be handled and lead to early exit of the function
+  OKAY              = 0, // no error occured
+  CONNECT_FAILED    = (1 << 0), // connection to device could not be established
+  INVALID_ANSWER    = (1 << 1), // answer of device does not match protocol
+  INVALID_PARAMETER = (1 << 2), // parameters do not match requirements (i.e. speed > 100%)
+  INVALID_CONFIG    = (1 << 3), // configuration does not match parameters request
+  PROCESS_RUNNING   = (1 << 4), // internal process still running or internal timer not yet ready (i.e. kick right after kick => cooling time not over)
+  ERROR_IGNORED     = (1 << 5), // error ignored, so no break out and no error handling happended
+  ERROR_HANDLED     = (1 << 6), // error handled and function continued with handled error (i.e. speed > 100% ==> speed = 100%)
+  ERROR_BREAK_OUT   = (1 << 7)  // error could not be handled and lead to early exit of the function
 }; 
 /*
   Construct your return value by merging the enum values with bitwise or ('|' operator)
