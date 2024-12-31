@@ -125,9 +125,9 @@ ERRORS Setup() {
 void Loop() {
   elapsedMillis t;
   int    aRawValues     [NUM_SENSORS];
-  double aBlurredValues [NUM_SENSORS];
-  double aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
-  double TotalSum;
+  int    aBlurredValues [NUM_SENSORS];
+  int    aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
+  int    TotalSum;
   int    iMaximum;
   double xDir;
   double yDir;
@@ -150,7 +150,7 @@ void Loop() {
     }
   }
   //
-  // Blur values
+  // Blur values (with scaling factor of 100)
   //
   for (int i = 0; i < ARRAY_LENGTH(aRawValues) ; i++) {
     int iLeft  = (i - 1 + ARRAY_LENGTH(aRawValues)) % ARRAY_LENGTH(aRawValues);
@@ -172,7 +172,7 @@ void Loop() {
   //      c = d0
   //      d = y0
   //
-  TotalSum = 0.0;
+  TotalSum = 0;
   for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
     int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValues);
     int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValues);
@@ -191,6 +191,9 @@ void Loop() {
       aExpandedValues[iCurrent] += b * Percentage * Percentage;
       aExpandedValues[iCurrent] += c * Percentage;
       aExpandedValues[iCurrent] += d;
+      if (aExpandedValues[iCurrent] < 0) { // negative values might mess up vector addition
+        aExpandedValues[iCurrent] = 0;
+      }
       TotalSum += aExpandedValues[iCurrent];
     }
   }
