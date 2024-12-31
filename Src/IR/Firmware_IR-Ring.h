@@ -55,7 +55,7 @@
 // Hardware Config
 //
 // "Direction":                                  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
-const unsigned short SENSOR_PINS[NUM_SENSORS] = {14, 27, 26, 25, 33, 32, 35, 34, 19, 18, 05, 17, 04, 02, 15, 13};
+const unsigned short SENSOR_PINS[NUM_SENSORS] = {13, 14, 27, 26, 25, 33, 32, 35, 34, 19, 18, 05, 17, 04, 02, 15};
 /*********************************************************************
 * 
 *  Functions
