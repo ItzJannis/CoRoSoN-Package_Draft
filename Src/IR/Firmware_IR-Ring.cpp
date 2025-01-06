@@ -33,7 +33,8 @@
 *********************************************************************/
 #include "Firmware_IR-Ring.h"
 #include <elapsedMillis.h>
-#include <Math.h>
+#include <RunningMedian.h>
+#include <math.h>
 #include <Wire.h>
 /*********************************************************************
 * 
@@ -58,8 +59,8 @@
 // VECTOR_ADDITION_SENSOR_COUNT
 #if (VECTOR_ADDITION_SENSOR_COUNT <= 0)
   #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be greater than 0"
-#elif (VECTOR_ADDITION_SENSOR_COUNT >= (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR))
-  #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be less than (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
+#elif (VECTOR_ADDITION_SENSOR_COUNT > (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR))
+  #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be less than or equal to (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
 #endif
 //
 // MIN_VALUE_TO_DETECT
@@ -73,6 +74,10 @@
 *********************************************************************/
 static byte _LastBallDir = 0;
 static byte _LastBallDist = 0;
+static RunningMedian _BallDirMedian (RUNNING_MEDIAN_HISTORY_LENGTH);
+static RunningMedian _BallDistMedian(RUNNING_MEDIAN_HISTORY_LENGTH);
+static byte _BallDir;
+static byte _BallDist;
 static bool _SetupSuccessfull = false;
 static long double _aFactorX[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // X: left to right in robot view
 static long double _aFactorY[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // Y: behind to front in robot view
@@ -86,8 +91,8 @@ static void _OnReceive(int n) {
 }
 
 static void _OnRequest(void) {
-  Wire.write(_LastBallDir);
-  Wire.write(_LastBallDist);
+  Wire.write(_BallDir);
+  Wire.write(_BallDist);
 }
 
 static void _CheckSetup(void) {
@@ -185,7 +190,8 @@ void Loop() {
     double c = d0;
     double d = y0;
     for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
-      int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
+      int iCurrent = ((i * EXPAND_FACTOR_PER_SENSOR) + j) % ARRAY_LENGTH(aExpandedValues);
+      // int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
       double Percentage = (double)j / (double)EXPAND_FACTOR_PER_SENSOR;
       aExpandedValues[iCurrent]  = a * Percentage * Percentage * Percentage;
       aExpandedValues[iCurrent] += b * Percentage * Percentage;
@@ -214,7 +220,7 @@ void Loop() {
     xDir += (aExpandedValues[iLeft] * _aFactorX[iLeft]) + (aExpandedValues[iRight] * _aFactorX[iRight]);
     yDir += (aExpandedValues[iLeft] * _aFactorY[iLeft]) + (aExpandedValues[iRight] * _aFactorY[iRight]);
   }
-  if(VECTOR_ADDITION_SENSOR_COUNT % 2 == 0 ) { // ensure added vectors are centered around maximum
+  if (VECTOR_ADDITION_SENSOR_COUNT % 2 == 0 ) { // ensure added vectors are centered around maximum
     int iLeft  = (iMaximum - (VECTOR_ADDITION_SENSOR_COUNT / 2) + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
     int iRight = (iMaximum + (VECTOR_ADDITION_SENSOR_COUNT / 2)) % ARRAY_LENGTH(aExpandedValues);
     xDir += (0.5 * aExpandedValues[iLeft] * _aFactorX[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorX[iRight]);
@@ -246,4 +252,14 @@ void Loop() {
     }
   }
   _LastBallDist = ARRAY_LENGTH(aExpandedValues) - Width50Percent;
+  //
+  // Update medians
+  //
+  _BallDirMedian.add(_LastBallDir);
+  _BallDistMedian.add(_LastBallDist);
+  //
+  // Update final values
+  //
+  _BallDir = _BallDirMedian.getMedian();
+  _BallDist = _BallDistMedian.getMedian();
 }

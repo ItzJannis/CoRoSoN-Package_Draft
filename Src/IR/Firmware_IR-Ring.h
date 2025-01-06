@@ -47,15 +47,16 @@
 // Software Config
 //
 #define NUM_SENSORS (16)
-#define BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE (60) // ! keep inside ]0;100[ 
+#define BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE (15) // ! keep inside ]0;100[ 
 #define EXPAND_FACTOR_PER_SENSOR (4) // ! keep inside [1;16] so that NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR is inside [NUM_SENSORS; 256]
-#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 4) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
+#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 1) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
 #define MIN_VALUE_TO_DETECT (50)
+#define RUNNING_MEDIAN_HISTORY_LENGTH (10)
 //
 // Hardware Config
 //
 // "Direction":                                  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
-const unsigned short SENSOR_PINS[NUM_SENSORS] = {13, 14, 27, 26, 25, 33, 32, 35, 34, 19, 18, 05, 17, 04, 02, 15};
+const unsigned short SENSOR_PINS[NUM_SENSORS] = {27, 26, 25, 33, 32, 35, 34, 19, 18, 05, 17, 04, 02, 15, 13, 14};
 /*********************************************************************
 * 
 *  Functions
