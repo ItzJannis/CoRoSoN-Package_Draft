@@ -10,7 +10,7 @@
 
 
 # Description
-This project offers a draft version to the official [CoRoSoN-Kit](https://github.com/CoRoSoN-Kit/) to provide the fundamental buiilding blocks for a fully functional robot participating in the Soccer Junior division of the [RoboCup](https://www.robocup.org). \
+This project offers a draft version to the official [CoRoSoN-Kit](https://github.com/CoRoSoN-Kit/) to provide the fundamental building blocks for a fully functional robot participating in the Soccer Junior division of the [RoboCup](https://www.robocup.org). \
 The purpose is to allow for an newcomer friendly entry to the competition by wrapping the essential functions with easy to use APIs. Board designs are designed to be rebuild easily and affordable. \
 \
 Feel free to reach out to us for questions, feedback, suggestions or constructive critism! \
