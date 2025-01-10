@@ -69,9 +69,9 @@ ERRORS IRRing::Update() {
   this->mPriv.SeesBall      = false;
   this->mPriv.BallDirection = -32;
   this->mPriv.BallDistance  = aAnswer[1];
-  if(this->mPriv.BallDistance != 0) {
+  if(this->mPriv.BallDistance > 0) {
     this->mPriv.SeesBall      = true;
-    this->mPriv.BallDirection = aAnswer[0] - 32;
+    this->mPriv.BallDirection = aAnswer[0] - 31;
   }
   return r;
 }

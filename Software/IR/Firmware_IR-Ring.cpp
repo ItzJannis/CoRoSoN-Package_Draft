@@ -33,7 +33,6 @@
 *********************************************************************/
 #include "Firmware_IR-Ring.h"
 #include <elapsedMillis.h>
-#include <RunningMedian.h>
 #include <math.h>
 #include <Wire.h>
 /*********************************************************************
@@ -72,16 +71,14 @@
 *  Implementations
 *
 *********************************************************************/
-static byte _LastBallDir = 0;
-static byte _LastBallDist = 0;
-static RunningMedian _BallDirMedian (RUNNING_MEDIAN_HISTORY_LENGTH);
-static RunningMedian _BallDistMedian(RUNNING_MEDIAN_HISTORY_LENGTH);
-static byte _BallDir;
-static byte _BallDist;
+static byte _BallDir = 0;
+static byte _BallDist = 0;
 static bool _SetupSuccessfull = false;
 static long double _aFactorX[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // X: left to right in robot view
 static long double _aFactorY[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // Y: behind to front in robot view
 static long double _AngleStep_rad = 2.0 * PI / (long double)(NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR);
+static double _AlphaEMA_Dir  = (double)EMA_ALPHA_DIRECTION_PERCENTAGE / 100.0;
+static double _AlphaEMA_Dist = (double)EMA_ALPHA_DISTANCE_PERCENTAGE  / 100.0;
 
 static void _OnReceive(int n) {
   (void)n; // not needed
@@ -128,18 +125,21 @@ ERRORS Setup() {
 }
 
 void Loop() {
+  static int    aRawValues     [NUM_SENSORS];
+  static int    aBlurredValues [NUM_SENSORS];
+  static int    aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
+  static int    TotalSum;
+  static int    iMaximum;
+  static double xDir;
+  static double yDir;
+  static double signedDir;
+  static int    iDir;
+  static int    Width50Percent;
+  static double Sum;
+  static double EMA_DirX; 
+  static double EMA_DirY;
+  static double EMA_Dist;
   elapsedMillis t;
-  int    aRawValues     [NUM_SENSORS];
-  int    aBlurredValues [NUM_SENSORS];
-  int    aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
-  int    TotalSum;
-  int    iMaximum;
-  double xDir;
-  double yDir;
-  double angleDir_rad;
-  int    iDir;
-  int    Width50Percent;
-  double Sum;
 
   _CheckSetup();
   ZEROMEM(aRawValues);
@@ -209,7 +209,7 @@ void Loop() {
   iMaximum = 0;
   for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
     if (aExpandedValues[i] > aExpandedValues[iMaximum]) {
-        iMaximum = i;
+      iMaximum = i;
     }
   }
   xDir = aExpandedValues[iMaximum] * _aFactorX[iMaximum];
@@ -226,40 +226,39 @@ void Loop() {
     xDir += (0.5 * aExpandedValues[iLeft] * _aFactorX[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorX[iRight]);
     yDir += (0.5 * aExpandedValues[iLeft] * _aFactorY[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorY[iRight]);
   }
-  angleDir_rad = atan2(xDir, yDir); // robot's x and y is swapped compared to math's
-  iDir = (int)((angleDir_rad / _AngleStep_rad) + 0.5); // + 0.5 for rounded division
-  iDir += (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
-  _LastBallDir = iDir;
+  signedDir = atan2(xDir, yDir) / _AngleStep_rad; // robot's x and y is swapped compared to math's
+  iDir = (int)(signedDir + ((signedDir < 0) ? -0.5 : 0.5)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
   //
   // Calculate distance by how wide 50% of the integral area spread around direction
   //
   Sum = aExpandedValues[iDir];
   if(Sum < MIN_VALUE_TO_DETECT) {
-    _LastBallDir = 0;
-    _LastBallDist = 0;
+    _BallDir = 0;
+    _BallDist = 0;
     return;
   }
   Width50Percent = 1;
   if(Sum < (0.5 * TotalSum)) {
     for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
       if(Sum > (0.5 * TotalSum)) {
-          Width50Percent = 2 * i;
-          break;
+        Width50Percent = 2 * i;
+        break;
       }
       int iLeft  = (iDir - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
       int iRight = (iDir + i) % ARRAY_LENGTH(aExpandedValues);
       Sum += aExpandedValues[iLeft] + aExpandedValues[iRight];
     }
   }
-  _LastBallDist = ARRAY_LENGTH(aExpandedValues) - Width50Percent;
   //
-  // Update medians
+  // Update Exponential Moving Averages (EMAs): Y_i = a * X_i + (1-a) * Y_(i-1) with a in ]0;1]
   //
-  _BallDirMedian.add(_LastBallDir);
-  _BallDistMedian.add(_LastBallDist);
+  //    To avoid messups when ball lies between array ends (behind robot, very slightly left)
+  //    the direction is divided into x and y component, averaged and reassembled.
   //
-  // Update final values
-  //
-  _BallDir = _BallDirMedian.getMedian();
-  _BallDist = _BallDistMedian.getMedian();
+  EMA_DirX = (_AlphaEMA_Dir * _aFactorX[iDir]) + ((1.0 - _AlphaEMA_Dir) * EMA_DirX);
+  EMA_DirY = (_AlphaEMA_Dir * _aFactorY[iDir]) + ((1.0 - _AlphaEMA_Dir) * EMA_DirY);
+  signedDir = atan2(EMA_DirX, EMA_DirY) / _AngleStep_rad; // robot's x and y is swapped compared to math's
+  _BallDir = (int)(signedDir + ((signedDir < 0) ? -0.5 : 0.5)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
+  EMA_Dist = (_AlphaEMA_Dist * (ARRAY_LENGTH(aExpandedValues) - Width50Percent)) + ((1.0 - _AlphaEMA_Dist) * EMA_Dist);
+  _BallDist = (byte)(EMA_Dist + 0.5); // + 0.5 to round to next int
 }

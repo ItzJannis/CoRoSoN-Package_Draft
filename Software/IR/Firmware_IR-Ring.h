@@ -51,7 +51,8 @@
 #define EXPAND_FACTOR_PER_SENSOR (4) // ! keep inside [1;16] so that NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR is inside [NUM_SENSORS; 256]
 #define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 1) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
 #define MIN_VALUE_TO_DETECT (50)
-#define RUNNING_MEDIAN_HISTORY_LENGTH (10)
+#define EMA_ALPHA_DIRECTION_PERCENTAGE (40) // ! keep inside ]0;100], essentially this is proportion a new value gets in the median
+#define EMA_ALPHA_DISTANCE_PERCENTAGE  (40) // ! keep inside ]0;100], essentially this is proportion a new value gets in the median
 //
 // Hardware Config
 //

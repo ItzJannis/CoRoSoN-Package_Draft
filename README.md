@@ -26,8 +26,7 @@ The software and the hardware designs are developed to the best of our knowledge
 1. [Arduino](https://www.arduino.cc/)
 2. [Espressif ESP32 Board Information](https://github.com/espressif/arduino-esp32)
 3. [elapsedMillis](https://github.com/pfeerick/elapsedMillis/wiki)
-4. [RunningMedian](https://github.com/RobTillaart/RunningMedian)
-5. [Pixy2I2C](https://github.com/charmedlabs/pixy2/blob/master/src/host/arduino/libraries/Pixy2/Pixy2I2C.h)
+4. [Pixy2I2C](https://github.com/charmedlabs/pixy2/blob/master/src/host/arduino/libraries/Pixy2/Pixy2I2C.h)
 
 
 ## Shared
@@ -89,6 +88,7 @@ This firmware basically does:
 4. Find highest value
 5. Vector addition around highest value for precise direction
 6. Determine distance by numeric integration
+7. Compute final direction and distance with Exponetial Moving Average (EMA)
 
 
 
