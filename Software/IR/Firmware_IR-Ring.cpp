@@ -190,8 +190,7 @@ void Loop() {
     double c = d0;
     double d = y0;
     for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
-      int iCurrent = ((i * EXPAND_FACTOR_PER_SENSOR) + j) % ARRAY_LENGTH(aExpandedValues);
-      // int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
+      int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
       double Percentage = (double)j / (double)EXPAND_FACTOR_PER_SENSOR;
       aExpandedValues[iCurrent]  = a * Percentage * Percentage * Percentage;
       aExpandedValues[iCurrent] += b * Percentage * Percentage;
