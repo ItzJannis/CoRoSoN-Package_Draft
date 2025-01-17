@@ -39,18 +39,10 @@
 *********************************************************************/
 
 IRRing::IRRing(unsigned short Address) {
-  ERRORS r;
-
   ZEROMEM(this->mPriv);
   this->mPriv.Address       = Address;
   this->mPriv.BallDirection = -64;
   this->mPriv.BallDistance  = 0;
-  r = I2C_TestConnection(Address);
-  if(r) {
-    DEBUG_ERRORS(r);
-    DEBUG_PRINT(Address);
-    DEBUG_BLOCK("IR ring init failed", 1000);
-  }
 }
 
 ERRORS IRRing::Update() {
