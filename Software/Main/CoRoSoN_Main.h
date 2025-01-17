@@ -34,10 +34,6 @@
 *
 *********************************************************************/
 #include <Arduino.h>
-#include "../Peripheral/CoRoSoN_Eeprom.h"
-#include "../Peripheral/CoRoSoN_IR-Ring.h"
-#include "../Peripheral/CoRoSoN_Pixy.h"
-#include "../Peripheral/CoRoSoN_Compass.h"
 #include "../Shared/CoRoSoN_Util.h"
 #include "../Shared/CoRoSoN_Config.h"
 #include "../Shared/CoRoSoN_I2C.h"
@@ -106,13 +102,23 @@ ERRORS CoRoSoN_Init(void);
 
 /************************************************************
 *
-* ? CoRoSoN_SetLEDColor()
+* ? CoRoSoN_SetBoardLEDColor()
 *   
 * * Description:
-*     Sets the color of the LED
+*     Sets the color of a onboard LED
 *
 ************************************************************/
-ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Color);
+ERRORS CoRoSoN_SetBoardLEDColor(SIDE Side, COLOR Color);
+
+/************************************************************
+*
+* ? CoRoSoN_SetI2CLEDColor()
+*   
+* * Description:
+*     Sets the color of a LED connected via I2C
+*
+************************************************************/
+ERRORS CoRoSoN_SetI2CLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Color);
 
 /************************************************************
 *

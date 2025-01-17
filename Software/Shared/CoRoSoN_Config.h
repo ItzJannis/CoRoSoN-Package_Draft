@@ -50,15 +50,15 @@
 //
 //  Motors
 //
-#define MOTOR_ENA   ( 2)
-#define MOTOR_1_DIR (13)
-#define MOTOR_2_DIR (14)
-#define MOTOR_3_DIR (25)
-#define MOTOR_4_DIR (18)
-#define MOTOR_1_PWM (12)
-#define MOTOR_2_PWM (27)
-#define MOTOR_3_PWM (26)
-#define MOTOR_4_PWM (19)
+#define MOTOR_ENA   (27)
+#define MOTOR_1_DIR (19)
+#define MOTOR_2_DIR (12)
+#define MOTOR_3_DIR (32)
+#define MOTOR_4_DIR (26)
+#define MOTOR_1_PWM (18)
+#define MOTOR_2_PWM (14)
+#define MOTOR_3_PWM (33)
+#define MOTOR_4_PWM (25)
 //
 // Analog Inputs
 //
@@ -67,8 +67,17 @@
 #define ANALOG_IN_3 (39)
 #define ANALOG_IN_4 (36)
 //
+// LEDs
+//
+#define ONBOARD_LED_LEFT_R ( 5)
+#define ONBOARD_LED_LEFT_G (23)
+#define ONBOARD_LED_LEFT_B (16)
+#define ONBOARD_LED_RIGHT_R (15)
+#define ONBOARD_LED_RIGHT_G (13)
+#define ONBOARD_LED_RIGHT_B ( 4)
+//
 // Digital Outputs
 //
-#define DIGITAL_OUT_1 (15)
-#define DIGITAL_OUT_2 (23)
+#define DIGITAL_OUT_1 (17)
+#define DIGITAL_OUT_2 ( 2)
 #endif // COROSON_CONFIG_H

@@ -77,24 +77,16 @@ ERRORS CoRoSoN_Init() {
   //
   // Pins
   //
-  // Digital
-  pinMode(DIGITAL_OUT_1, OUTPUT); digitalWrite(DIGITAL_OUT_1, LOW);
-  pinMode(DIGITAL_OUT_2, OUTPUT); digitalWrite(DIGITAL_OUT_2, LOW);
-  // Analog
-  pinMode(ANALOG_IN_1, INPUT);
-  pinMode(ANALOG_IN_2, INPUT);
-  pinMode(ANALOG_IN_3, INPUT);
-  pinMode(ANALOG_IN_4, INPUT);
   // Motors
   pinMode(MOTOR_ENA, OUTPUT); digitalWrite(MOTOR_ENA, HIGH);
   pinMode(MOTOR_1_DIR, OUTPUT);
   pinMode(MOTOR_2_DIR, OUTPUT);
   pinMode(MOTOR_3_DIR, OUTPUT);
   pinMode(MOTOR_4_DIR, OUTPUT);
-  ledcAttachPin(MOTOR_1_PWM, MOTOR_1);
-  ledcAttachPin(MOTOR_2_PWM, MOTOR_2);
-  ledcAttachPin(MOTOR_3_PWM, MOTOR_3);
-  ledcAttachPin(MOTOR_4_PWM, MOTOR_4);
+  // ledcAttachPin(MOTOR_1_PWM, MOTOR_1);
+  // ledcAttachPin(MOTOR_2_PWM, MOTOR_2);
+  // ledcAttachPin(MOTOR_3_PWM, MOTOR_3);
+  // ledcAttachPin(MOTOR_4_PWM, MOTOR_4);
   ledcAttach(MOTOR_1_PWM, 1000, 8);
   ledcAttach(MOTOR_2_PWM, 1000, 8);
   ledcAttach(MOTOR_3_PWM, 1000, 8);
@@ -103,10 +95,44 @@ ERRORS CoRoSoN_Init() {
   ledcWrite(MOTOR_2_PWM, 0);
   ledcWrite(MOTOR_3_PWM, 0);
   ledcWrite(MOTOR_4_PWM, 0);
+  // Analog
+  pinMode(ANALOG_IN_1, INPUT);
+  pinMode(ANALOG_IN_2, INPUT);
+  pinMode(ANALOG_IN_3, INPUT);
+  pinMode(ANALOG_IN_4, INPUT);
+  // LEDs
+  pinMode(ONBOARD_LED_LEFT_R , OUTPUT); digitalWrite(ONBOARD_LED_LEFT_R , HIGH);
+  pinMode(ONBOARD_LED_LEFT_G , OUTPUT); digitalWrite(ONBOARD_LED_LEFT_G , HIGH);
+  pinMode(ONBOARD_LED_LEFT_B , OUTPUT); digitalWrite(ONBOARD_LED_LEFT_B , HIGH);
+  pinMode(ONBOARD_LED_RIGHT_R, OUTPUT); digitalWrite(ONBOARD_LED_RIGHT_R, HIGH);
+  pinMode(ONBOARD_LED_RIGHT_G, OUTPUT); digitalWrite(ONBOARD_LED_RIGHT_G, HIGH);
+  pinMode(ONBOARD_LED_RIGHT_B, OUTPUT); digitalWrite(ONBOARD_LED_RIGHT_B, HIGH);
+  // Digital
+  pinMode(DIGITAL_OUT_1, OUTPUT); digitalWrite(DIGITAL_OUT_1, LOW);
+  pinMode(DIGITAL_OUT_2, OUTPUT); digitalWrite(DIGITAL_OUT_2, LOW);
   return r;
 }
 
-ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Color) {
+ERRORS CoRoSoN_SetBoardLEDColor(SIDE Side, COLOR Color) {
+  ERRORS r;
+
+  r = OKAY;
+  switch(Side) {
+    case LEFT: 
+      digitalWrite(ONBOARD_LED_LEFT_R , !(Color & (1 << 0)));
+      digitalWrite(ONBOARD_LED_LEFT_G , !(Color & (1 << 1)));
+      digitalWrite(ONBOARD_LED_LEFT_B , !(Color & (1 << 2)));
+      break;
+    case RIGHT: 
+      digitalWrite(ONBOARD_LED_RIGHT_R , !(Color & (1 << 0)));
+      digitalWrite(ONBOARD_LED_RIGHT_G , !(Color & (1 << 1)));
+      digitalWrite(ONBOARD_LED_RIGHT_B , !(Color & (1 << 2)));
+      break;
+  }
+  return r;
+}
+
+ERRORS CoRoSoN_SetI2CLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Color) {
   ERRORS r;
   byte   bColor;
   byte   aMessage[1];
@@ -117,7 +143,7 @@ ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Col
   switch(AddModule) {
     case I2C_MODULE_1: 
       switch(Side) {
-        case LEFT : 
+        case LEFT: 
           _LEDModule1Left = bColor * 2; 
           break;
         case RIGHT: bColor *= 16; 
@@ -131,7 +157,7 @@ ERRORS CoRoSoN_SetLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Col
       break;
     case I2C_MODULE_2: 
       switch(Side) {
-        case LEFT : 
+        case LEFT: 
           _LEDModule2Left  = bColor * 2; 
           break;
         case RIGHT: bColor *= 16; 
@@ -167,8 +193,8 @@ bool CoRoSoN_ButtonIsPressed(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side) {
     return false;
   }
   switch(Side) {
-    case LEFT : IsPressed = (~aAnswer[0]) & 0b00000001; break; // left  btn presed =>  1-bit is 0
-    case RIGHT: IsPressed = (~aAnswer[0]) & 0b01000000; break; // right btn presed => 64-bit is 0
+    case LEFT : IsPressed = ((~aAnswer[0]) & (1 << 0)); break; // left  btn presed =>  1-bit is 0
+    case RIGHT: IsPressed = ((~aAnswer[0]) & (1 << 6)); break; // right btn presed => 64-bit is 0
   }
   return IsPressed;
 }
