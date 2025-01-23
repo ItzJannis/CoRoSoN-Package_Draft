@@ -179,40 +179,16 @@ void Loop() {
     aBlurredValues[i] += (double)aRawValues[iRight] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
   }
   //
-  // Expand values by cubic interpolation:
-  //    Given: 
-  //      y0 := f (0), y1 := f (1),
-  //      d0 := f'(0), d1 := f'(1)
-  //    Task: 
-  //      Find coefficients a, b, c, d of 3rd degree polynomial f
-  //    Solution:
-  //      a =  2y0 - 2y1 +  d0 + d1
-  //      b = -3y0 + 3y1 - 2d0 - d1
-  //      c = d0
-  //      d = y0
+  // Expand values by linear interpolation
   //
   TotalSum = 0;
   for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
-    int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValues);
-    int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValues);
-    double y0 = aBlurredValues[i];
-    double y1 = aBlurredValues[iNext];
-    double d0 = aBlurredValues[iNext] - aBlurredValues[i];
-    double d1 = aBlurredValues[iNextNext] - aBlurredValues[iNext];
-    double a =   (2 * y0) - (2 * y1) +      d0  + d1;
-    double b = - (3 * y0) + (3 * y1) - (2 * d0) - d1;
-    double c = d0;
-    double d = y0;
+    int iNext = (i + 1) % ARRAY_LENGTH(aBlurredValues);
+    int Diff = aBlurredValues[iNext] - aBlurredValues[i];
     for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
       int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
       double Percentage = (double)j / (double)EXPAND_FACTOR_PER_SENSOR;
-      aExpandedValues[iCurrent]  = a * Percentage * Percentage * Percentage;
-      aExpandedValues[iCurrent] += b * Percentage * Percentage;
-      aExpandedValues[iCurrent] += c * Percentage;
-      aExpandedValues[iCurrent] += d;
-      if (aExpandedValues[iCurrent] < 0) { // negative values might mess up vector addition
-        aExpandedValues[iCurrent] = 0;
-      }
+      aExpandedValues[iCurrent] = aBlurredValues[i] + (int)((Percentage * (double)Diff) + 0.5); // + 0.5 to round to next int
       TotalSum += aExpandedValues[iCurrent];
     }
   }

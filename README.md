@@ -84,7 +84,7 @@ Providing the firmware that is designed to be loaded onto the infrared sensor ri
 #### Software Process / Algorithm
 1. Read all physical signals
 2. Gaussian blur on each sensors value with its 2 neighbouring values
-3. Expand values to higher resolution by using cubic interpolation
+3. Expand values to higher resolution by using linear interpolation
 4. Find highest value
 5. Vector addition around highest value for precise direction
 6. Determine distance by numeric integration
