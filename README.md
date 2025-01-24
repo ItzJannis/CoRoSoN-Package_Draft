@@ -81,7 +81,7 @@ For the distance: 1...32 represents closest...furthest, 0 represents no ball see
 Software that is supposed to be used on the infrared sensor ring.
 ### Firmware_IR-Ring
 Providing the firmware that is designed to be loaded onto the infrared sensor ring and making it ready to be used in a plug-and-play manner. \
-This firmware basically does:
+#### Software Process / Algorithm
 1. Read all physical signals
 2. Gaussian blur on each sensors value with its 2 neighbouring values
 3. Expand values to higher resolution by using cubic interpolation
@@ -89,7 +89,18 @@ This firmware basically does:
 5. Vector addition around highest value for precise direction
 6. Determine distance by numeric integration
 7. Compute final direction and distance with Exponetial Moving Average (EMA)
-
+#### Configuration
+1. `BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE` \
+Percentage the original value is weighted with when doing the gaussian blur with the direct neighbors
+2. `VECTOR_ADDITION_SENSOR_COUNT` \
+Numbers of vectors that are considered in the vector addition step. \
+They are symmetrically added around the highest value vector. \
+E.g. `#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 4)` and highest value is at the central front sensor: the 90° slice around that sensor (45° left and 45° right) are taken into account
+3. `EMA_ALPHA_DIRECTION_PERCENTAGE` and `VECTOR_ADDITION_SENSOR_COUNT` \
+Exponential moving average to smooth the output: \
+`output = a * (new value) + (1-a) * (last output)` \
+where the defines are `a` in percent. \
+The higher `a`, the more reactive the output is. The lower `a`, the more smooth, but also slower the ouput behaves.
 
 
 # Hardware
