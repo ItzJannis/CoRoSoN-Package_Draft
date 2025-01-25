@@ -62,6 +62,20 @@
   #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be less than or equal to (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
 #endif
 //
+// EMA_ALPHA_DIRECTION_PERCENTAGE
+#if (EMA_ALPHA_DIRECTION_PERCENTAGE <= 0)
+  #error "Config-Error: EMA_ALPHA_DIRECTION_PERCENTAGE must be greater than 0"
+#elif (EMA_ALPHA_DIRECTION_PERCENTAGE > 100)
+  #error "Config-Error: EMA_ALPHA_DIRECTION_PERCENTAGE must be less than or equal to 100"
+#endif
+//
+// EMA_ALPHA_DISTANCE_PERCENTAGE
+#if (EMA_ALPHA_DISTANCE_PERCENTAGE <= 0)
+  #error "Config-Error: EMA_ALPHA_DISTANCE_PERCENTAGE must be greater than 0"
+#elif (EMA_ALPHA_DISTANCE_PERCENTAGE > 100)
+  #error "Config-Error: EMA_ALPHA_DISTANCE_PERCENTAGE must be less than or equal to 100"
+#endif
+//
 // MIN_VALUE_TO_DETECT
 #if (MIN_VALUE_TO_DETECT <= 0)
   #error "Config-Error: MIN_VALUE_TO_DETECT must be greater than 0"
