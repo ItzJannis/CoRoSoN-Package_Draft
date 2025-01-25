@@ -33,34 +33,12 @@
 *********************************************************************/
 #include "Firmware_IR-Ring.h"
 #include <elapsedMillis.h>
-#include <math.h>
 #include <Wire.h>
 /*********************************************************************
 * 
 *  Config Check
 *
 *********************************************************************/
-//
-// BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE
-#if (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE <= 0)
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be greater than 0"
-#elif (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE >= 100)
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be less than 100"
-#endif
-//
-// EXPAND_FACTOR_PER_SENSOR
-#if (EXPAND_FACTOR_PER_SENSOR <= 0)
-  #error "Config-Error: EXPAND_FACTOR_PER_SENSOR must be greater than 0"
-#elif (EXPAND_FACTOR_PER_SENSOR > 16)
-  #error "Config-Error: EXPAND_FACTOR_PER_SENSOR must be less than 16"
-#endif
-//
-// VECTOR_ADDITION_SENSOR_COUNT
-#if (VECTOR_ADDITION_SENSOR_COUNT <= 0)
-  #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be greater than 0"
-#elif (VECTOR_ADDITION_SENSOR_COUNT > (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR))
-  #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be less than or equal to (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
-#endif
 //
 // EMA_ALPHA_DIRECTION_PERCENTAGE
 #if (EMA_ALPHA_DIRECTION_PERCENTAGE <= 0)
@@ -88,11 +66,39 @@
 static byte _BallDir = 0;
 static byte _BallDist = 0;
 static bool _SetupSuccessfull = false;
-static long double _aFactorX[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // X: left to right in robot view
-static long double _aFactorY[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // Y: behind to front in robot view
-static long double _AngleStep_rad = 2.0 * PI / (long double)(NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR);
 static double _AlphaEMA_Dir  = (double)EMA_ALPHA_DIRECTION_PERCENTAGE / 100.0;
 static double _AlphaEMA_Dist = (double)EMA_ALPHA_DISTANCE_PERCENTAGE  / 100.0;
+//
+// Grid like image: X = left to right, Y = top to bottom
+//
+static const unsigned int _GRID_RANGE_X = 139; // Ratio approx. soccer field, max. distance approx. 250
+static const unsigned int _GRID_RANGE_Y = 208; // Ratio approx. soccer field, max. distance approx. 250
+static const unsigned int _GRID_WIDTH  = _GRID_RANGE_X + 13 + _GRID_RANGE_X;
+static const unsigned int _GRID_HEIGHT = _GRID_RANGE_Y + 13 + _GRID_RANGE_Y;
+//
+// Sensor stencel:
+//
+// |--------- 13 ----------|
+// . . . . . . X . . . . . . --
+// . . . . X . . . X . . . .  |
+// . . X . . . . . . . X . .  |
+// . . . . . . . . . . . . .  |
+// . X . . . . . . . . . X .  |
+// . . . . . . . . . . . . .  |
+// X . . . . . + . . . . . X  13
+// . . . . . . . . . . . . .  |
+// . X . . . . . . . . . X .  |
+// . . . . . . . . . . . . .  |
+// . . X . . . . . . . X . .  |
+// . . . . X . . . X . . . .  |
+// . . . . . . X . . . . . . --
+//
+static const int _aSensorX [NUM_SENSORS] = { -2, -4, -5, -6, -5, -4, -2,  0,  2,  4,  5,  6,  5,  4,  2,  0};
+static const int _aSensorY [NUM_SENSORS] = {  5,  4,  2,  0, -2, -4, -5, -6, -5, -4, -2,  0,  2,  4,  5,  6};
+static int _CenterX = _GRID_RANGE_X - 1 + 7;
+static int _CenterY = _GRID_RANGE_Y - 1 + 7;
+static float _aaGridTotal[_GRID_WIDTH][_GRID_HEIGHT];
+static float _aaaSensorInfluence[NUM_SENSORS][_GRID_WIDTH][_GRID_HEIGHT];
 
 static void _OnReceive(int n) {
   (void)n; // not needed
@@ -117,9 +123,15 @@ ERRORS Setup() {
 
   r = OKAY;
   Serial.begin(115200);
+  //
+  // Init pins
+  //
   for(int i = 0; i < ARRAY_LENGTH(SENSOR_PINS); i++) {
     pinMode(SENSOR_PINS[i], INPUT);
   }
+  //
+  // Init I2C
+  //
   Wire.onRequest(_OnRequest);
   Wire.onReceive(_OnReceive);
   if(!Wire.begin(I2C_ADD_IR)) {
@@ -129,27 +141,63 @@ ERRORS Setup() {
   } else {
     _SetupSuccessfull = true;
   }
-  for(int i = 0; i < ARRAY_LENGTH(_aFactorX); i++) {
-    _aFactorX[i] = sin(_AngleStep_rad * (i - (ARRAY_LENGTH(_aFactorX) / 2) + 1)); // robot's x is math's y
-  }
-  for(int i = 0; i < ARRAY_LENGTH(_aFactorY); i++) {
-    _aFactorY[i] = cos(_AngleStep_rad * (i - (ARRAY_LENGTH(_aFactorY) / 2) + 1)); // robot's y is math's x
+  //
+  // Init Grid
+  //
+  ZEROMEM(_aaaSensorInfluence);
+  Vector vCenter(_CenterX, _CenterY);
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    Vector vCenterToSensor(_aSensorX[i], _aSensorY[i]);
+    //
+    // Determine where a reflection would occure (center of beem)
+    // Ray = vCenter + t * vCenterToSensor
+    // => lowest t to intersect with edge of grid determines potential reflection point
+    //
+    float t_left   = ((_aSensorX[i] < 0) ? (- (float)_GRID_WIDTH  / (2.0f * (float)_aSensorX[i])) : __FLT_MAX__);
+    float t_right  = ((_aSensorX[i] > 0) ? (  (float)_GRID_WIDTH  / (2.0f * (float)_aSensorX[i])) : __FLT_MAX__);
+    float t_top    = ((_aSensorY[i] < 0) ? (- (float)_GRID_HEIGHT / (2.0f * (float)_aSensorY[i])) : __FLT_MAX__);
+    float t_bottom = ((_aSensorY[i] > 0) ? (  (float)_GRID_HEIGHT / (2.0f * (float)_aSensorY[i])) : __FLT_MAX__);
+    int xReflection = -1;
+    int yReflection = -1;
+    if ((t_left <= t_right) && (t_left <= t_top) && (t_left <= t_bottom)) {
+      xReflection = 0;
+      yReflection = ((float)_GRID_HEIGHT / 2.0f) + (t_left * (float)_aSensorY[i]) + 0.5f; // +0.5f for rounding to next int
+    }
+    if ((t_right <= t_left) && (t_right <= t_top) && (t_right <= t_bottom)) {
+      xReflection = _GRID_WIDTH - 1;
+      yReflection = ((float)_GRID_HEIGHT / 2.0f) + (t_right * (float)_aSensorY[i]) + 0.5f; // +0.5f for rounding to next int
+    }
+    if ((t_top <= t_left) && (t_top <= t_right) && (t_top <= t_bottom)) {
+      xReflection = ((float)_GRID_WIDTH / 2.0f) + (t_top * (double)_aSensorX[i]) + 0.5f; // +0.5f for rounding to next int
+      yReflection = 0;
+    }
+    if ((t_bottom <= t_left) && (t_bottom <= t_right) && (t_bottom <= t_top)) {
+      xReflection = ((float)_GRID_WIDTH / 2.0f) + (t_bottom * (float)_aSensorX[i]) + 0.5f; // +0.5f for rounding to next int
+      yReflection = _GRID_HEIGHT - 1;
+    }
+    //
+    // Calculate influence factor for each cell
+    //
+    for (int x = 0; x < _GRID_WIDTH; x++) {
+      for (int y = 0; y < _GRID_HEIGHT; y++) {
+        // Determine if cell is in the 90 degree view angle of sensor
+        Vector vSensorToCell = Vector(x, y) - (vCenter + vCenterToSensor);
+        if (vCenterToSensor.angleOffsetTo(vSensorToCell) <= 0.5 * M_PI) {
+          _aaaSensorInfluence[i][x][y] = 1.0f;
+        } else {
+          _aaaSensorInfluence[i][x][y] = 1.0f / (float)(((x - xReflection) * (x - xReflection)) + ((y - yReflection) * (y - yReflection)));
+        }
+      }
+    }
   }
   return r;
 }
 
 void Loop() {
-  static int    aRawValues     [NUM_SENSORS];
-  static int    aBlurredValues [NUM_SENSORS];
-  static int    aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
-  static int    TotalSum;
-  static int    iMaximum;
-  static double xDir;
-  static double yDir;
-  static double signedDir;
-  static int    iDir;
-  static int    Width50Percent;
-  static double Sum;
+  static int aRawValues[NUM_SENSORS];
+  static float MaxValue;
+  static int MaxX;
+  static int MaxY;
   static double EMA_DirX; 
   static double EMA_DirY;
   static double EMA_Dist;
@@ -157,97 +205,58 @@ void Loop() {
 
   _CheckSetup();
   ZEROMEM(aRawValues);
-  ZEROMEM(aBlurredValues);
-  ZEROMEM(aExpandedValues);
+  ZEROMEM(_aaGridTotal);
   //
   // Read sensors
   //
   t = 0;
   while (t < 5) { // 5ms equal 6 runs of 833us each
-    for (int i = 0; i < ARRAY_LENGTH(aRawValues); i++) {
+    for (int i = 0; i < NUM_SENSORS; i++) {
       aRawValues[i] += 1 - digitalRead(SENSOR_PINS[i]);                         
     }
   }
   //
-  // Blur values (with scaling factor of 100)
+  // Create total grid
   //
-  for (int i = 0; i < ARRAY_LENGTH(aRawValues) ; i++) {
-    int iLeft  = (i - 1 + ARRAY_LENGTH(aRawValues)) % ARRAY_LENGTH(aRawValues);
-    int iRight = (i + 1) % ARRAY_LENGTH(aRawValues);
-    aBlurredValues[i]  = (double)aRawValues[i]      * (double)BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
-    aBlurredValues[i] += (double)aRawValues[iLeft ] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
-    aBlurredValues[i] += (double)aRawValues[iRight] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
-  }
-  //
-  // Expand values by linear interpolation
-  //
-  TotalSum = 0;
-  for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
-    int iNext = (i + 1) % ARRAY_LENGTH(aBlurredValues);
-    int Diff = aBlurredValues[iNext] - aBlurredValues[i];
-    for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
-      int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
-      double Percentage = (double)j / (double)EXPAND_FACTOR_PER_SENSOR;
-      aExpandedValues[iCurrent] = aBlurredValues[i] + (int)((Percentage * (double)Diff) + 0.5); // + 0.5 to round to next int
-      TotalSum += aExpandedValues[iCurrent];
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    for (int x = 0; x < _GRID_WIDTH; x++) {
+      for (int y = 0; y < _GRID_HEIGHT; y++) {
+        _aaGridTotal[x][y] += (float)aRawValues[i] * _aaaSensorInfluence[i][x][y];
+      }
     }
   }
   //
-  // Get direction by vector addition in the cone around highest value
+  // Find maximum
   //
-  iMaximum = 0;
-  for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
-    if (aExpandedValues[i] > aExpandedValues[iMaximum]) {
-      iMaximum = i;
+  MaxValue = -1.0;
+  MaxX = -1;
+  MaxY = -1;
+  for (int x = 0; x < _GRID_WIDTH; x++) {
+    for (int y = 0; y < _GRID_HEIGHT; y++) {
+      if (_aaGridTotal[x][y] > MaxValue) {
+        MaxValue = _aaGridTotal[x][y];
+        MaxX = x;
+        MaxY = y;
+      }
     }
   }
-  xDir = aExpandedValues[iMaximum] * _aFactorX[iMaximum];
-  yDir = aExpandedValues[iMaximum] * _aFactorY[iMaximum];
-  for (int i = 1; i < (VECTOR_ADDITION_SENSOR_COUNT - 1) / 2; i++) {
-    int iLeft = (iMaximum - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
-    int iRight = (iMaximum + i) % ARRAY_LENGTH(aExpandedValues);
-    xDir += (aExpandedValues[iLeft] * _aFactorX[iLeft]) + (aExpandedValues[iRight] * _aFactorX[iRight]);
-    yDir += (aExpandedValues[iLeft] * _aFactorY[iLeft]) + (aExpandedValues[iRight] * _aFactorY[iRight]);
-  }
-  if (VECTOR_ADDITION_SENSOR_COUNT % 2 == 0 ) { // ensure added vectors are centered around maximum
-    int iLeft  = (iMaximum - (VECTOR_ADDITION_SENSOR_COUNT / 2) + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
-    int iRight = (iMaximum + (VECTOR_ADDITION_SENSOR_COUNT / 2)) % ARRAY_LENGTH(aExpandedValues);
-    xDir += (0.5 * aExpandedValues[iLeft] * _aFactorX[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorX[iRight]);
-    yDir += (0.5 * aExpandedValues[iLeft] * _aFactorY[iLeft]) + (0.5 * aExpandedValues[iRight] * _aFactorY[iRight]);
-  }
-  signedDir = atan2(xDir, yDir) / _AngleStep_rad; // robot's x and y is swapped compared to math's
-  iDir = (int)(signedDir + ((signedDir < 0) ? -0.5 : 0.5)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
-  //
-  // Calculate distance by how wide 50% of the integral area spread around direction
-  //
-  Sum = aExpandedValues[iDir];
-  if(Sum < MIN_VALUE_TO_DETECT) {
+  if(MaxValue < (float)MIN_VALUE_TO_DETECT) {
     _BallDir = 0;
     _BallDist = 0;
     return;
   }
-  Width50Percent = 1;
-  if(Sum < (0.5 * TotalSum)) {
-    for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
-      if(Sum > (0.5 * TotalSum)) {
-        Width50Percent = 2 * i;
-        break;
-      }
-      int iLeft  = (iDir - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
-      int iRight = (iDir + i) % ARRAY_LENGTH(aExpandedValues);
-      Sum += aExpandedValues[iLeft] + aExpandedValues[iRight];
-    }
-  }
   //
-  // Update Exponential Moving Averages (EMAs): Y_i = a * X_i + (1-a) * Y_(i-1) with a in ]0;1]
+  // Smoothing with Exponential Moving Average
   //
-  //    To avoid messups when ball lies between array ends (behind robot, very slightly left)
-  //    the direction is divided into x and y component, averaged and reassembled.
+  EMA_DirX = (_AlphaEMA_Dir * (double)MaxX) + ((1.0 - _AlphaEMA_Dir) * EMA_DirX);
+  EMA_DirY = (_AlphaEMA_Dir * (double)MaxY) + ((1.0 - _AlphaEMA_Dir) * EMA_DirY);
   //
-  EMA_DirX = (_AlphaEMA_Dir * _aFactorX[iDir]) + ((1.0 - _AlphaEMA_Dir) * EMA_DirX);
-  EMA_DirY = (_AlphaEMA_Dir * _aFactorY[iDir]) + ((1.0 - _AlphaEMA_Dir) * EMA_DirY);
-  signedDir = atan2(EMA_DirX, EMA_DirY) / _AngleStep_rad; // robot's x and y is swapped compared to math's
-  _BallDir = (int)(signedDir + ((signedDir < 0) ? -0.5 : 0.5)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
-  EMA_Dist = (_AlphaEMA_Dist * (ARRAY_LENGTH(aExpandedValues) - Width50Percent)) + ((1.0 - _AlphaEMA_Dist) * EMA_Dist);
-  _BallDist = (byte)(EMA_Dist + 0.5); // + 0.5 to round to next int
+  // Calc final vector to ball
+  //  Note: vector x = bottom to top, y = left to right, such that angles are correct
+  //  => See CoRoSoN_Vector.h for more info
+  //  
+  Vector vBall((double)(_GRID_HEIGHT - 1) - EMA_DirY, EMA_DirX); // Vector x = bottom to 
+  double floatingDir = (vBall.getAngle() * 128.0 / M_PI) + 127.5;
+  _BallDir = ((floatingDir < 0.0) ? 255 : (int)floatingDir);
+  _BallDir = vBall.getRadius() + 0.5; // +0.5 for rounding to next int
 }

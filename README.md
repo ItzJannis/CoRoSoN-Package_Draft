@@ -83,20 +83,11 @@ Software that is supposed to be used on the infrared sensor ring.
 Providing the firmware that is designed to be loaded onto the infrared sensor ring and making it ready to be used in a plug-and-play manner. \
 #### Software Process / Algorithm
 1. Read all physical signals
-2. Gaussian blur on each sensors value with its 2 neighbouring values
-3. Expand values to higher resolution by using linear interpolation
-4. Find highest value
-5. Vector addition around highest value for precise direction
-6. Determine distance by numeric integration
-7. Compute final direction and distance with Exponetial Moving Average (EMA)
+2. Create a heatmap were the ball be accross the entire field
+3. Find grid cell with maximum likelihood of containing the ball 
+4. Compute final direction and distance with Exponetial Moving Average (EMA)
 #### Configuration
-1. `BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE` \
-Percentage the original value is weighted with when doing the gaussian blur with the direct neighbors
-2. `VECTOR_ADDITION_SENSOR_COUNT` \
-Numbers of vectors that are considered in the vector addition step. \
-They are symmetrically added around the highest value vector. \
-E.g. `#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 4)` and highest value is at the central front sensor: the 90° slice around that sensor (45° left and 45° right) are taken into account
-3. `EMA_ALPHA_DIRECTION_PERCENTAGE` and `VECTOR_ADDITION_SENSOR_COUNT` \
+`EMA_ALPHA_DIRECTION_PERCENTAGE` and `EMA_ALPHA_DISTANCE_PERCENTAGE` \
 Exponential moving average to smooth the output: \
 `output = a * (new value) + (1-a) * (last output)` \
 where the defines are `a` in percent. \
