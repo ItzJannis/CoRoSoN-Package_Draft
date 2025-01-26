@@ -36,8 +36,8 @@
 *
 *********************************************************************/
 #include <Arduino.h>
-#include "../Shared/CoRoSoN_Util.h"
-#include "../Shared/CoRoSoN_Config.h"
+#include "CoRoSoN_Util.h"
+#include "CoRoSoN_Config.h"
 /*********************************************************************
 * 
 *  Config
@@ -47,12 +47,13 @@
 // Software Config
 //
 #define NUM_SENSORS (16)
-#define BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE (10) // ! keep inside ]0;100[ 
+#define EMA_ALPHA_PERCENTAGE (40) // ! keep inside ]0;100], essentially this is proportion a new value gets in the median
+#define BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE (40) // ! keep inside ]0;100] 
 #define EXPAND_FACTOR_PER_SENSOR (4) // ! keep inside [1;16] so that NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR is inside [NUM_SENSORS; 256]
-#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 1) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
+#define VECTOR_ADDITION_SENSOR_COUNT (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR / 4) // ! keep inside [1;NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]
 #define MIN_VALUE_TO_DETECT (50)
-#define EMA_ALPHA_DIRECTION_PERCENTAGE (40) // ! keep inside ]0;100], essentially this is proportion a new value gets in the median
-#define EMA_ALPHA_DISTANCE_PERCENTAGE  (40) // ! keep inside ]0;100], essentially this is proportion a new value gets in the median
+#define RUNNING_MEDIAN_DIRECTION_LENGTH (16)
+#define RUNNING_MEDIAN_DISTANCE_LENGTH  (16)
 //
 // Hardware Config
 //

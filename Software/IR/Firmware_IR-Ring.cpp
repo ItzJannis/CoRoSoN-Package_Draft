@@ -44,8 +44,8 @@
 // BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE
 #if (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE <= 0)
   #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be greater than 0"
-#elif (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE >= 100)
-  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be less than 100"
+#elif (BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE > 100)
+  #error "Config-Error: BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE must be less than than or equal to 100"
 #endif
 //
 // EXPAND_FACTOR_PER_SENSOR
@@ -62,23 +62,26 @@
   #error "Config-Error: VECTOR_ADDITION_SENSOR_COUNT must be less than or equal to (NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR)"
 #endif
 //
-// EMA_ALPHA_DIRECTION_PERCENTAGE
-#if (EMA_ALPHA_DIRECTION_PERCENTAGE <= 0)
-  #error "Config-Error: EMA_ALPHA_DIRECTION_PERCENTAGE must be greater than 0"
-#elif (EMA_ALPHA_DIRECTION_PERCENTAGE > 100)
-  #error "Config-Error: EMA_ALPHA_DIRECTION_PERCENTAGE must be less than or equal to 100"
-#endif
-//
-// EMA_ALPHA_DISTANCE_PERCENTAGE
-#if (EMA_ALPHA_DISTANCE_PERCENTAGE <= 0)
-  #error "Config-Error: EMA_ALPHA_DISTANCE_PERCENTAGE must be greater than 0"
-#elif (EMA_ALPHA_DISTANCE_PERCENTAGE > 100)
-  #error "Config-Error: EMA_ALPHA_DISTANCE_PERCENTAGE must be less than or equal to 100"
+// EMA_ALPHA_PERCENTAGE
+#if (EMA_ALPHA_PERCENTAGE <= 0)
+  #error "Config-Error: EMA_ALPHA_PERCENTAGE must be greater than 0"
+#elif (EMA_ALPHA_PERCENTAGE > 100)
+  #error "Config-Error: EMA_ALPHA_PERCENTAGE must be less than or equal to 100"
 #endif
 //
 // MIN_VALUE_TO_DETECT
 #if (MIN_VALUE_TO_DETECT <= 0)
   #error "Config-Error: MIN_VALUE_TO_DETECT must be greater than 0"
+#endif
+//
+// RUNNING_MEDIAN_DIRECTION_LENGTH
+#if (RUNNING_MEDIAN_DIRECTION_LENGTH <= 0)
+  #error "Config-Error: RUNNING_MEDIAN_DIRECTION_LENGTH must be greater than 0"
+#endif
+//
+// RUNNING_MEDIAN_DISTANCE_LENGTH
+#if (RUNNING_MEDIAN_DISTANCE_LENGTH <= 0)
+  #error "Config-Error: RUNNING_MEDIAN_DISTANCE_LENGTH must be greater than 0"
 #endif
 /*********************************************************************
 * 
@@ -91,8 +94,7 @@ static bool _SetupSuccessfull = false;
 static long double _aFactorX[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // X: left to right in robot view
 static long double _aFactorY[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR]; // Y: behind to front in robot view
 static long double _AngleStep_rad = 2.0 * PI / (long double)(NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR);
-static double _AlphaEMA_Dir  = (double)EMA_ALPHA_DIRECTION_PERCENTAGE / 100.0;
-static double _AlphaEMA_Dist = (double)EMA_ALPHA_DISTANCE_PERCENTAGE  / 100.0;
+static double _AlphaEMA = (double)EMA_ALPHA_PERCENTAGE / 100.0;
 
 static void _OnReceive(int n) {
   (void)n; // not needed
@@ -138,8 +140,89 @@ ERRORS Setup() {
   return r;
 }
 
+static void _Merge_int(int Arr[], int iLeft, int iMiddle, int iRight) {
+  int aLeft [iMiddle - iLeft + 1];
+  int aRight[iRight - iMiddle];
+
+  memcpy(aLeft, Arr + iLeft, sizeof(aLeft));
+  memcpy(aRight, Arr + iMiddle + 1, sizeof(aRight));
+  int i = 0;
+  int j = 0;
+  int k = iLeft;
+  while ((i < ARRAY_LENGTH(aLeft)) && (j < ARRAY_LENGTH(aRight))) {
+    if (aLeft[i] <= aRight[j]) {
+     Arr[k] = aLeft[i];
+     i++;
+    } else {
+      Arr[k] = aRight[j];
+      j++;
+    }
+    k++;
+  }
+  while (i < ARRAY_LENGTH(aLeft)) {
+    Arr[k] = aLeft[i];
+    i++;
+    k++;
+  }
+  while (j < ARRAY_LENGTH(aRight)) {
+    Arr[k] = aRight[j];
+    j++;
+    k++;
+  }
+}
+
+static void _MergeSort_int(int Arr[], int iLeft, int iRight) {
+  if (iLeft < iRight) {
+    int iMiddle = iLeft + (iRight - iLeft) / 2;
+    _MergeSort_int(Arr, iLeft, iMiddle);
+    _MergeSort_int(Arr, iMiddle + 1, iRight);
+    _Merge_int(Arr, iLeft, iMiddle, iRight);
+  }
+}
+
+static void _Merge_double(double Arr[], int iLeft, int iMiddle, int iRight) {
+  double aLeft [iMiddle - iLeft + 1];
+  double aRight[iRight - iMiddle];
+
+  memcpy(aLeft, Arr + iLeft, sizeof(aLeft));
+  memcpy(aRight, Arr + iMiddle + 1, sizeof(aRight));
+  int i = 0;
+  int j = 0;
+  int k = iLeft;
+  while ((i < ARRAY_LENGTH(aLeft)) && (j < ARRAY_LENGTH(aRight))) {
+    if (aLeft[i] <= aRight[j]) {
+     Arr[k] = aLeft[i];
+     i++;
+    } else {
+      Arr[k] = aRight[j];
+      j++;
+    }
+    k++;
+  }
+  while (i < ARRAY_LENGTH(aLeft)) {
+    Arr[k] = aLeft[i];
+    i++;
+    k++;
+  }
+  while (j < ARRAY_LENGTH(aRight)) {
+    Arr[k] = aRight[j];
+    j++;
+    k++;
+  }
+}
+
+static void _MergeSort_double(double Arr[], int iLeft, int iRight) {
+  if (iLeft < iRight) {
+    int iMiddle = iLeft + (iRight - iLeft) / 2;
+    _MergeSort_double(Arr, iLeft, iMiddle);
+    _MergeSort_double(Arr, iMiddle + 1, iRight);
+    _Merge_double(Arr, iLeft, iMiddle, iRight);
+  }
+}
+
 void Loop() {
   static int    aRawValues     [NUM_SENSORS];
+  static double aEMAValues     [NUM_SENSORS];
   static int    aBlurredValues [NUM_SENSORS];
   static int    aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
   static int    TotalSum;
@@ -150,9 +233,9 @@ void Loop() {
   static int    iDir;
   static int    Width50Percent;
   static double Sum;
-  static double EMA_DirX; 
-  static double EMA_DirY;
-  static double EMA_Dist;
+  static double aDirXHistory[RUNNING_MEDIAN_DIRECTION_LENGTH];
+  static double aDirYHistory[RUNNING_MEDIAN_DIRECTION_LENGTH];
+  static int    aDistHistory[RUNNING_MEDIAN_DISTANCE_LENGTH];
   elapsedMillis t;
 
   _CheckSetup();
@@ -169,16 +252,21 @@ void Loop() {
     }
   }
   //
-  // Blur values (with scaling factor of 100)
+  // Smooth values with Exponential Moving Average (EMA)
   //
-  for (int i = 0; i < ARRAY_LENGTH(aRawValues) ; i++) {
-    int iLeft  = (i - 1 + ARRAY_LENGTH(aRawValues)) % ARRAY_LENGTH(aRawValues);
-    int iRight = (i + 1) % ARRAY_LENGTH(aRawValues);
-    aBlurredValues[i]  = (double)aRawValues[i]      * (double)BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
-    aBlurredValues[i] += (double)aRawValues[iLeft ] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
-    aBlurredValues[i] += (double)aRawValues[iRight] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
+  for (int i = 0; i < ARRAY_LENGTH(aEMAValues); i++) {
+    aEMAValues[i] = (_AlphaEMA * (double)aRawValues[i]) + ((1.0 - _AlphaEMA) * aEMAValues[i]);                    
   }
   //
+  // Blur values (with scaling factor of 100)
+  //
+  for (int i = 0; i < ARRAY_LENGTH(aEMAValues); i++) {
+    int iLeft  = (i - 1 + ARRAY_LENGTH(aEMAValues)) % ARRAY_LENGTH(aEMAValues);
+    int iRight = (i + 1) % ARRAY_LENGTH(aEMAValues);
+    aBlurredValues[i]  = (double)aEMAValues[i]      * (double)BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
+    aBlurredValues[i] += (double)aEMAValues[iLeft ] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
+    aBlurredValues[i] += (double)aEMAValues[iRight] * (double)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0;
+  }//
   // Expand values by cubic interpolation:
   //    Given: 
   //      y0 := f (0), y1 := f (1),
@@ -263,15 +351,48 @@ void Loop() {
     }
   }
   //
-  // Update Exponential Moving Averages (EMAs): Y_i = a * X_i + (1-a) * Y_(i-1) with a in ]0;1]
+  // Update running medians: Y_i = a * X_i + (1-a) * Y_(i-1) with a in ]0;1]
   //
   //    To avoid messups when ball lies between array ends (behind robot, very slightly left)
   //    the direction is divided into x and y component, averaged and reassembled.
   //
-  EMA_DirX = (_AlphaEMA_Dir * _aFactorX[iDir]) + ((1.0 - _AlphaEMA_Dir) * EMA_DirX);
-  EMA_DirY = (_AlphaEMA_Dir * _aFactorY[iDir]) + ((1.0 - _AlphaEMA_Dir) * EMA_DirY);
-  signedDir = atan2(EMA_DirX, EMA_DirY) / _AngleStep_rad; // robot's x and y is swapped compared to math's
+  // Update X history
+  for (int i = 0; i < ARRAY_LENGTH(aDirXHistory) - 1; i++) {
+    aDirXHistory[i] = aDirXHistory[i+1];
+  }
+  aDirXHistory[ARRAY_LENGTH(aDirXHistory) - 1] = _aFactorX[iDir];
+  // Update Y history
+  for (int i = 0; i < ARRAY_LENGTH(aDirYHistory) - 1; i++) {
+    aDirYHistory[i] = aDirYHistory[i+1];
+  }
+  aDirYHistory[ARRAY_LENGTH(aDirYHistory) - 1] = _aFactorY[iDir];
+  // Update Dist history
+  for (int i = 0; i < ARRAY_LENGTH(aDistHistory) - 1; i++) {
+    aDistHistory[i] = aDistHistory[i+1];
+  }
+  aDistHistory[ARRAY_LENGTH(aDistHistory) - 1] = (ARRAY_LENGTH(aExpandedValues) - Width50Percent);
+  //
+  // Sort arrays
+  //
+  double aDirXHistory_sorted[RUNNING_MEDIAN_DIRECTION_LENGTH];
+  double aDirYHistory_sorted[RUNNING_MEDIAN_DIRECTION_LENGTH];
+  int    aDistHistory_sorted[RUNNING_MEDIAN_DISTANCE_LENGTH];
+  memcpy(aDirXHistory_sorted, aDirXHistory, sizeof(aDirXHistory_sorted));
+  memcpy(aDirYHistory_sorted, aDirYHistory, sizeof(aDirYHistory_sorted));
+  memcpy(aDistHistory_sorted, aDistHistory, sizeof(aDistHistory_sorted));
+  _MergeSort_double(aDirXHistory_sorted, 0, ARRAY_LENGTH(aDirXHistory_sorted) - 1);
+  _MergeSort_double(aDirYHistory_sorted, 0, ARRAY_LENGTH(aDirYHistory_sorted) - 1);
+  _MergeSort_int   (aDistHistory_sorted, 0, ARRAY_LENGTH(aDistHistory_sorted) - 1);
+  //
+  // Get median values
+  //
+  double DirXMedian = aDirXHistory_sorted[(ARRAY_LENGTH(aDirXHistory_sorted) - 1) / 2];
+  double DirYMedian = aDirYHistory_sorted[(ARRAY_LENGTH(aDirYHistory_sorted) - 1) / 2];
+  int    DistMedian = aDistHistory_sorted[(ARRAY_LENGTH(aDistHistory_sorted) - 1) / 2];
+  //
+  // Calc final direction
+  //
+  signedDir = atan2(DirXMedian, DirYMedian) / _AngleStep_rad; // robot's x and y is swapped compared to math's
   _BallDir = (int)(signedDir + ((signedDir < 0) ? -0.5 : 0.5)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
-  EMA_Dist = (_AlphaEMA_Dist * (ARRAY_LENGTH(aExpandedValues) - Width50Percent)) + ((1.0 - _AlphaEMA_Dist) * EMA_Dist);
-  _BallDist = (byte)(EMA_Dist + 0.5); // + 0.5 to round to next int
+  _BallDist = DistMedian;
 }
