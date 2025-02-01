@@ -36,8 +36,8 @@
 *
 *********************************************************************/
 #include <Arduino.h>
-#include "CoRoSoN_Util.h"
-#include "CoRoSoN_Config.h"
+#include "../Shared/CoRoSoN_Util.h"
+#include "../Shared/CoRoSoN_Config.h"
 /*********************************************************************
 * 
 *  Config

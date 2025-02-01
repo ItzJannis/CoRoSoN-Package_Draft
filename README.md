@@ -83,13 +83,17 @@ Software that is supposed to be used on the infrared sensor ring.
 Providing the firmware that is designed to be loaded onto the infrared sensor ring and making it ready to be used in a plug-and-play manner. \
 #### Software Process / Algorithm
 1. Read all physical signals
-2. Use exponential moving average (EMA) for each sensor - the lower `EMA_ALPHA_PERCENTAGE`, the more the values are smoothed
-3. Gaussian blur on each sensors value with its 2 neighbouring values - `BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE` defines the weight the middle sensor gets
-4. Expand values to higher resolution by using cubic interpolation
-5. Find highest value
-6. Vector addition around highest value for more precise direction - `VECTOR_ADDITION_SENSOR_COUNT` defines the number of vectors involved
-6. Determine distance by numeric integration
-7. Compute final direction and distance with running median - `RUNNING_MEDIAN_DIRECTION_LENGTH` and `RUNNING_MEDIAN_DISTANCE_LENGTH` define the history length for the running medians
+2. Remove minimum value from all sensor values (ensuring at least one is 0)
+3. Use exponential moving average (EMA) for each sensor - the lower `EMA_ALPHA_PERCENTAGE`, the more the values are smoothed
+4. Gaussian blur on each sensors value with its 2 neighbouring values - `BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE` defines the weight the middle sensor gets
+5. Exaggerate differences by squaring percentage of maximum value for each sensor
+6. Expand values to higher resolution by using cubic interpolation
+7. Giving the sensors close to the last output direction a boost of up to 5% of their current value, to reduce fluctuations
+8. Find highest value
+9. Exaggerate differences by squaring percentage of maximum value for each sensor
+10. Vector addition around highest value for more precise direction - `VECTOR_ADDITION_SENSOR_COUNT` defines the number of vectors involved
+11. Determine distance by numeric integration
+12. Compute final direction and distance with running median - `RUNNING_MEDIAN_DIRECTION_LENGTH` and `RUNNING_MEDIAN_DISTANCE_LENGTH` define the history length for the running medians
 
 # Hardware
 ## Used 3rd Parties
