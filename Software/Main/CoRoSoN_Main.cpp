@@ -78,15 +78,11 @@ ERRORS CoRoSoN_Init() {
   // Pins
   //
   // Motors
-  pinMode(MOTOR_ENA, OUTPUT); digitalWrite(MOTOR_ENA, HIGH);
+  pinMode(MOTOR_DIS, OUTPUT); digitalWrite(MOTOR_DIS, LOW);
   pinMode(MOTOR_1_DIR, OUTPUT);
   pinMode(MOTOR_2_DIR, OUTPUT);
   pinMode(MOTOR_3_DIR, OUTPUT);
   pinMode(MOTOR_4_DIR, OUTPUT);
-  // ledcAttachPin(MOTOR_1_PWM, MOTOR_1);
-  // ledcAttachPin(MOTOR_2_PWM, MOTOR_2);
-  // ledcAttachPin(MOTOR_3_PWM, MOTOR_3);
-  // ledcAttachPin(MOTOR_4_PWM, MOTOR_4);
   ledcAttach(MOTOR_1_PWM, 1000, 8);
   ledcAttach(MOTOR_2_PWM, 1000, 8);
   ledcAttach(MOTOR_3_PWM, 1000, 8);
@@ -114,9 +110,6 @@ ERRORS CoRoSoN_Init() {
 }
 
 ERRORS CoRoSoN_SetBoardLEDColor(SIDE Side, COLOR Color) {
-  ERRORS r;
-
-  r = OKAY;
   switch(Side) {
     case LEFT: 
       digitalWrite(ONBOARD_LED_LEFT_R , !(Color & (1 << 0)));
@@ -129,7 +122,7 @@ ERRORS CoRoSoN_SetBoardLEDColor(SIDE Side, COLOR Color) {
       digitalWrite(ONBOARD_LED_RIGHT_B , !(Color & (1 << 2)));
       break;
   }
-  return r;
+  return OKAY;
 }
 
 ERRORS CoRoSoN_SetI2CLEDColor(I2C_ADD_BTNLED_MODULE AddModule, SIDE Side, COLOR Color) {
@@ -210,11 +203,10 @@ ERRORS CoRoSoN_SetMotor(MOTOR Motor, DIRECTION Direction, unsigned int SpeedPerc
     SpeedPercentage = 100;
   }
   switch(Motor) {
-    case MOTOR_1: digitalWrite(MOTOR_1_DIR, Direction); break;
-    case MOTOR_2: digitalWrite(MOTOR_2_DIR, Direction); break;
-    case MOTOR_3: digitalWrite(MOTOR_3_DIR, Direction); break;
-    case MOTOR_4: digitalWrite(MOTOR_4_DIR, Direction); break;
+    case MOTOR_1: digitalWrite(MOTOR_1_DIR, Direction); ledcWrite(MOTOR_1_PWM, (SpeedPercentage * 255) / 100); break;
+    case MOTOR_2: digitalWrite(MOTOR_2_DIR, Direction); ledcWrite(MOTOR_2_PWM, (SpeedPercentage * 255) / 100); break;
+    case MOTOR_3: digitalWrite(MOTOR_3_DIR, Direction); ledcWrite(MOTOR_3_PWM, (SpeedPercentage * 255) / 100); break;
+    case MOTOR_4: digitalWrite(MOTOR_4_DIR, Direction); ledcWrite(MOTOR_4_PWM, (SpeedPercentage * 255) / 100); break;
   }
-  ledcWrite(Motor, (SpeedPercentage * 255) / 100);
   return r;
 }

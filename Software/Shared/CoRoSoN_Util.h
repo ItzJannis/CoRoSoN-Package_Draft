@@ -139,7 +139,6 @@ enum ERROR_CODE : ERRORS {
 
 // Fills the bytes at the adress of the passed offset with 0's
 #define ZEROMEM(Obj) memset(&Obj, 0, sizeof(Obj))
-#define ZEROMEM_N(Obj, NumBytes) memset(&Obj, 0, NumBytes)
 
 // 
 // Do not call these directly!
