@@ -127,7 +127,7 @@ ERRORS Setup() {
   if(!Wire.begin(I2C_ADD_IR)) {
     r |= CONNECT_FAILED | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
-    DEBUG_BLOCK("I2C-Bus konnte nicht gestartet werden", 1000);
+    DEBUG_BLOCK("Failed to initialize I2C", 1000);
   } else {
     _SetupSuccessfull = true;
   }
@@ -229,13 +229,12 @@ void Loop() {
   static float aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
   static float MaxExpandedValue;
   static float TotalSum;
+  static float DistPercentage;
   static int   iMaximum;
   static float xDir;
   static float yDir;
   static float signedDir;
   static int   iDir;
-  static int   Width50Percent;
-  static float Sum;
   static float aDirXHistory[RUNNING_MEDIAN_DIRECTION_LENGTH];
   static float aDirYHistory[RUNNING_MEDIAN_DIRECTION_LENGTH];
   static int   aDistHistory[RUNNING_MEDIAN_DISTANCE_LENGTH];
@@ -314,7 +313,6 @@ void Loop() {
   //      c = d0
   //      d = y0
   //
-  TotalSum = 0;
   for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
     int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValues);
     int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValues);
@@ -344,7 +342,6 @@ void Loop() {
         float p = (float)Dist * 2.0f / (float)VECTOR_ADDITION_SENSOR_COUNT;
         aExpandedValues[i] *= 1.05f - (0.05f * p);
       }
-      TotalSum += aExpandedValues[iCurrent];
     }
   }
   //
@@ -361,9 +358,11 @@ void Loop() {
   //
   // Exaggerate differences for more significant peaks
   //
+  TotalSum = 0.0f;
   for (int i = 0; i < ARRAY_LENGTH(aExpandedValues); i++) {
     float p = aExpandedValues[i] / (float)MaxExpandedValue;
     aExpandedValues[i] = p * p * (float)MaxExpandedValue;
+    TotalSum += aExpandedValues[i];
   }
   //
   // Get direction by vector addition in the cone around highest value
@@ -385,21 +384,10 @@ void Loop() {
   signedDir = atan2(xDir, yDir) / _AngleStep_rad; // robot's x and y is swapped compared to math's
   iDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
   //
-  // Calculate distance by how wide 50% of the integral area spread around direction
+  // Calculate distance
   //
-  Sum = aExpandedValues[iDir];
-  Width50Percent = 1;
-  if(Sum < (0.5f * TotalSum)) {
-    for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
-      if(Sum > (0.5f * TotalSum)) {
-        Width50Percent = 2 * i;
-        break;
-      }
-      int iLeft  = (iDir - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
-      int iRight = (iDir + i) % ARRAY_LENGTH(aExpandedValues);
-      Sum += aExpandedValues[iLeft] + aExpandedValues[iRight];
-    }
-  }
+  DistPercentage = TotalSum / (aExpandedValues[iDir] * ARRAY_LENGTH(aExpandedValues) / 2.0f);
+  DistPercentage = MIN(MAX(0.0f, 1.0 - DistPercentage), 1.0f);
   //
   // Update running medians: Y_i = a * X_i + (1-a) * Y_(i-1) with a in ]0;1]
   //
@@ -420,7 +408,7 @@ void Loop() {
   for (int i = 0; i < ARRAY_LENGTH(aDistHistory) - 1; i++) {
     aDistHistory[i] = aDistHistory[i+1];
   }
-  aDistHistory[ARRAY_LENGTH(aDistHistory) - 1] = (ARRAY_LENGTH(aExpandedValues) - Width50Percent);
+  aDistHistory[ARRAY_LENGTH(aDistHistory) - 1] = (DistPercentage * (float)ARRAY_LENGTH(aExpandedValues)) + 0.5f; // + 0.5f to round to next int
   //
   // Sort arrays
   //
