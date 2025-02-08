@@ -34,7 +34,7 @@ Software that is not build for a specific board but is shared across different b
 
 ### CoRoSoN_Util
 Providing usefull utility definitions for error handling, initializing data and better debugging. \
-The `enum ERROR_CODE` provides bitflags for uniform error handling while `DEBUG_PRINT(Variable)`, `DEBUG_ERRORS(Errors)` and `DEBUG_BLOCK(Message, NumMillis)` provide easier debugging via the serial connection and the `MIN(X,Y)`, `MAX(X,Y)`, `ABS(X)`, `ARRAY_LENGTH(Arr)`, `ZEROMEM(Obj)` and `ZEROMEM_N(Obj, NumBytes)` provide function-like macros to handle data without tedious reimplementation of often used functionalities.
+The `enum ERROR_CODE` provides bitflags for uniform error handling while `DEBUG_PRINT(Variable)`, `DEBUG_ERRORS(Errors)` and `DEBUG_BLOCK(Message, NumMillis)` provide easier debugging via the serial connection and the `MIN(X,Y)`, `MAX(X,Y)`, `ABS(X)`, `ARRAY_LENGTH(Arr)`, `ZEROMEM(Obj)` provide function-like macros to handle data without tedious reimplementation of often used functionalities.
 
 ### CoRoSoN_I2C
 Providing a simpler, more beginner friendly interface to work with the I2C bus system used in this project. \

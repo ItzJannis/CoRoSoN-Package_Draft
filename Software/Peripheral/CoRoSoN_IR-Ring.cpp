@@ -41,7 +41,7 @@
 IRRing::IRRing(unsigned short Address) {
   ZEROMEM(this->mPriv);
   this->mPriv.Address       = Address;
-  this->mPriv.BallDirection = -64;
+  this->mPriv.BallDirection = -32;
   this->mPriv.BallDistance  = 0;
 }
 

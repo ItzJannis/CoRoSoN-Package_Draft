@@ -69,7 +69,6 @@ ERRORS I2C_TestConnection(unsigned short Address) {
     r |= CONNECT_FAILED;
     DEBUG_ERRORS(r);
     DEBUG_PRINT(Address);
-    DEBUG_BLOCK("Connection test failed", 1000);
   }
   return r;
 }
@@ -78,10 +77,15 @@ ERRORS I2C_Write(unsigned short Address, byte aMessageBytes[], unsigned int NumB
   ERRORS r;
   int    MessageLength;
 
-  r = OKAY;
-  ZEROMEM_N(aMessageBytes, NumBytes);
   _CheckInit();
-  Wire.begin(Address);
+  r = I2C_TestConnection(Address);
+  if(r) {
+    r |= ERROR_BREAK_OUT;
+    DEBUG_ERRORS(r);
+    DEBUG_PRINT(Address);
+    return r;
+  }
+  Wire.beginTransmission(Address);
   MessageLength = Wire.write(aMessageBytes, NumBytes);
   if(MessageLength != NumBytes) {
     r |= INVALID_ANSWER;
@@ -102,7 +106,6 @@ ERRORS I2C_ReadBlocking(unsigned short Address, byte aAnswerBytes[], unsigned in
   int    AnswerLength;
 
   r = OKAY;
-  ZEROMEM_N(aAnswerBytes, NumBytes);
   _CheckInit();
   r = I2C_TestConnection(Address);
   if(r) {
