@@ -15,7 +15,7 @@
 * *       So|ccer
 * *        N|ewcomers
 *
-* *    Project:     https://github.com/CoRoSoN-Kit/
+* *    Project:     https://github.com/CoRoSoN-Kit/CoRoSoN-Kit
 * *    Competition: https://www.robocup.org/
 *
 * *    Created by BohleBots:
