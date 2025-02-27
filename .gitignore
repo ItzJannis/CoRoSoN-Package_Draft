@@ -1,3 +1,4 @@
 *.json
 *.vscode
 *.DS_Store
+Software/Generated_ArduinoSketches/*
