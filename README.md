@@ -19,7 +19,16 @@ See you in the competition!
 ## Disclaimer
 The software and the hardware designs are developed to the best of our knowledge to serve the intented purpose, but may still contain faults. Our software and hardware are provided "as is" and do not provide any warranty. The risk of using it and all neccessary servicing, repair and correction as well as their cost is with you.
 
-
+# Makefile
+Using the Arduino IDE or arduino-cli requires all source for a .ino sketch to be inside the sketch folder or inside the libaries directory of the Arduino installation. \
+Therefore source files inside Software/Shared or Software/Peripheral, that are not located directly next to a .ino sketch, cause problems. \
+To allow for easy compatibility of this project with Arduino the Makefile was created. \
+It automates the generation of valid Arduino sketch folders, such that they can be opened in the Arduino IDE or used with arduino-cli.
+It also automates the compilation and even upload of the generated sketches. \
+\
+The Makefile does not require all source files to be inside the sketch folder, but it requires SketchName.ino to be located inside Software/SketchName/.
+\
+Run `make` inside the home directory of this repo to see all the options.
 
 # Software
 ## Requirements
