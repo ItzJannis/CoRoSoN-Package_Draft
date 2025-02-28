@@ -35,6 +35,7 @@
 *
 *********************************************************************/
 #include <Arduino.h>
+#include <PixyI2C.h>
 #include <Pixy2I2C.h>
 #include "../Shared/CoRoSoN_Util.h"
 /*********************************************************************
@@ -42,6 +43,12 @@
 *  Types
 *
 *********************************************************************/
+
+enum PIXY_VERSION : int {
+  PIXY_V1 = 0,
+  PIXY_V2
+}
+
 //
 // Pixy class
 //
@@ -55,7 +62,7 @@ public:
   *     Constructor
   *
   ************************************************************/
-  Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
+  Pixy(PIXY_VERSION Version, unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
 
   /************************************************************
   *
@@ -115,7 +122,9 @@ public:
   
 private:
   struct {
-    Pixy2I2C*      pPixy;
+    PIXY_VERSION   PixyVersion;
+    PixyI2C*       pPixyV1;
+    Pixy2I2C*      pPixyV2;
     unsigned short Address;
              int   SignatureGoal;
              int   SignatureOwnGoal;

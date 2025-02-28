@@ -1,7 +1,9 @@
 #include "CoRoSoN_Main.h"
 #include "../Peripheral/CoRoSoN_IR-Ring.h"
+#include "../Peripheral/CoRoSoN_Pixy.h"
 
 IRRing irRing(I2C_ADD_IR);
+Pixy pixy(PIXY_V1, I2C_ADD_PIXY, 0, 1);
 
 void setup() {
   CoRoSoN_Init();
