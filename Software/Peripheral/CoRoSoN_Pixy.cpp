@@ -38,31 +38,26 @@
 *
 *********************************************************************/
 
-Pixy::Pixy(PIXY_VERSION Version, unsigned short Address, int SignatureGoal, int SignatureOwnGoal) {
+Pixy::Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal) {
   ZEROMEM(this->mPriv);
   this->mPriv.Address          = Address;
   this->mPriv.SignatureGoal    = SignatureGoal;
   this->mPriv.SignatureOwnGoal = SignatureOwnGoal;
-  this->mPriv.PixyVersion = Version;
-  switch (this->mPriv.PixyVersion) {
-    case PIXY_V1: 
-      this->mPriv.pPixyV1 = new PixyI2C();
-      if(this->mPriv.pPixyV1->init(this->mPriv.Address) < 0) {
-        DEBUG_ERRORS(CONNECT_FAILED);
-        DEBUG_PRINT(Address);
-        DEBUG_BLOCK("Pixy init failed", 1000);
-      }
-      break;
-    case PIXY_V2:
-      this->mPriv.pPixyV2 = new Pixy2I2C();
-      if(this->mPriv.pPixyV2->init(this->mPriv.Address) < 0) {
-        DEBUG_ERRORS(CONNECT_FAILED);
-        DEBUG_PRINT(Address);
-        DEBUG_BLOCK("Pixy init failed", 1000);
-      }
-      break;
-    default: break;
+#if (PIXY_VERSION == 1)
+  this->mPriv.pPixyV1 = new PixyI2C();
+  if(this->mPriv.pPixyV1->init(this->mPriv.Address) < 0) {
+    DEBUG_ERRORS(CONNECT_FAILED);
+    DEBUG_PRINT(Address);
+    DEBUG_BLOCK("Pixy init failed", 1000);
   }
+#elif (PIXY_VERSION == 2)
+  this->mPriv.pPixyV2 = new Pixy2I2C();
+  if(this->mPriv.pPixyV2->init(this->mPriv.Address) < 0) {
+    DEBUG_ERRORS(CONNECT_FAILED);
+    DEBUG_PRINT(Address);
+    DEBUG_BLOCK("Pixy init failed", 1000);
+  }
+#endif
 }
 
 ERRORS Pixy::Update(void) {
@@ -84,15 +79,11 @@ ERRORS Pixy::Update(void) {
   //
   // Establish connection
   //
-  switch (this->mPriv.PixyVersion) {
-    case PIXY_V1: 
-      NumBlocks = this->mPriv.pPixyV1->getBlocks();
-      break;
-    case PIXY_V2:
-      NumBlocks = this->mPriv.pPixyV2->ccc.getBlocks();
-      break;
-    default: break;
-  }
+#if (PIXY_VERSION == 1)
+  NumBlocks = this->mPriv.pPixyV1->getBlocks();
+#elif (PIXY_VERSION == 2)
+  NumBlocks = this->mPriv.pPixyV2->ccc.getBlocks();
+#endif
   if(NumBlocks <= 0) {
     r |= CONNECT_FAILED | INVALID_ANSWER | ERROR_BREAK_OUT;
     DEBUG_ERRORS(r);
@@ -102,17 +93,13 @@ ERRORS Pixy::Update(void) {
   // Read data
   //
   for(int i = 0; i < NumBlocks; i++) {
-    switch (this->mPriv.PixyVersion) {
-      case PIXY_V1: 
-        Signature = this->mPriv.pPixyV1->blocks[i].signature;
-        X         = this->mPriv.pPixyV1->blocks[i].x;
-        break;
-      case PIXY_V2:
-        Signature = this->mPriv.pPixyV2->ccc.blocks[i].m_signature;
-        X         = this->mPriv.pPixyV2->ccc.blocks[i].m_x;
-        break;
-      default: break;
-    }
+#if (PIXY_VERSION == 1)
+    Signature = this->mPriv.pPixyV1->blocks[i].signature;
+    X         = this->mPriv.pPixyV1->blocks[i].x;
+#elif (PIXY_VERSION == 2)
+    Signature = this->mPriv.pPixyV2->ccc.blocks[i].m_signature;
+    X         = this->mPriv.pPixyV2->ccc.blocks[i].m_x;
+#endif
     if(Signature == this->mPriv.SignatureGoal) {
       UpdatedGoal          = true;
       this->mPriv.SeesGoal = true;

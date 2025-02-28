@@ -31,24 +31,29 @@
 #define COROSON_PIXY_H
 /*********************************************************************
 * 
+*  Config
+*
+*********************************************************************/
+#define PIXY_VERSION (2) // Set according to your setup
+/*********************************************************************
+* 
 *  Dependencies
 *
 *********************************************************************/
 #include <Arduino.h>
-#include <PixyI2C.h>
-#include <Pixy2I2C.h>
+#if (PIXY_VERSION == 1)
+  #include <PixyI2C.h>
+#elif (PIXY_VERSION == 2)
+  #include <Pixy2I2C.h>
+#elif
+  #error "Config-Error: PIXY_VERSION must be either 1 or 2"
+#endif
 #include "../Shared/CoRoSoN_Util.h"
 /*********************************************************************
 * 
 *  Types
 *
 *********************************************************************/
-
-enum PIXY_VERSION : int {
-  PIXY_V1 = 0,
-  PIXY_V2
-}
-
 //
 // Pixy class
 //
@@ -62,7 +67,7 @@ public:
   *     Constructor
   *
   ************************************************************/
-  Pixy(PIXY_VERSION Version, unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
+  Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
 
   /************************************************************
   *
@@ -122,9 +127,11 @@ public:
   
 private:
   struct {
-    PIXY_VERSION   PixyVersion;
+#if (PIXY_VERSION == 1)
     PixyI2C*       pPixyV1;
+#elif (PIXY_VERSION == 2)
     Pixy2I2C*      pPixyV2;
+#endif
     unsigned short Address;
              int   SignatureGoal;
              int   SignatureOwnGoal;
