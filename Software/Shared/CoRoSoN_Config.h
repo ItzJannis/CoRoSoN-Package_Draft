@@ -43,7 +43,6 @@
 //
 #define I2C_ADD_PIXY        (0x54)
 #define I2C_ADD_IR          (0x55)
-#define I2C_ADD_CMPS        (0x60)
 #define I2C_BASEADD_BTNLEDS (0x20)
 #define I2C_BTNLED_CODE_1 (0) // change to match binary number that is encoded by soldering on button and led module
 #define I2C_BTNLED_CODE_2 (1) // change to match binary number that is encoded by soldering on button and led module

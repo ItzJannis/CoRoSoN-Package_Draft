@@ -23,8 +23,7 @@ The software and the hardware designs are developed to the best of our knowledge
 Using the Arduino IDE or arduino-cli requires all source for a .ino sketch to be inside the sketch folder or inside the libaries directory of the Arduino installation. \
 Therefore source files inside Software/Shared or Software/Peripheral, that are not located directly next to a .ino sketch, cause problems. \
 To allow for easy compatibility of this project with Arduino the Makefile was created. \
-It automates the generation of valid Arduino sketch folders, such that they can be opened in the Arduino IDE or used with arduino-cli.
-It also automates the compilation and even upload of the generated sketches. \
+It automates the generation of valid Arduino sketch folders, such that they can be opened in the Arduino IDE or used with arduino-cli. \
 \
 The Makefile does not require all source files to be inside the sketch folder, but it requires SketchName.ino to be located inside Software/SketchName/.
 \
@@ -72,9 +71,6 @@ Providing an interface to the ESP32's eeprom which is easy to use.\
 The eeprom is very usefull to save backup data about the current program state (i.e. the robot is enabled to drive) in case of a shutdown or a reset for whatever reason.\
 The `struct EEPROM_DATA` can be filled with whatever you want to read / write from the eeprom.
 `EEPROM_Init()`, `EEPROM_Read()` and `EEPROM_Write()` provide an easy interface that only deals with instances of `EEPROM_DATA`.
-
-### CoRoSoN_Compass
-Providing `class Compass` with its `SetHeading()` and `HeadingAngle()` to make use of the compass sensor through a simple API.
 
 ### CoRoSoN_Pixy
 Providing `class Pixy` with its `Update()`, `SeesGoal()`, `SeesOwnGoal()`, `DirectionGoal()` and `DirectionOwnGoal()` to make use of the Pixy camera for locating the two goals on the playing field. \
