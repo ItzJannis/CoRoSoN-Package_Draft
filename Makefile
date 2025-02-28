@@ -85,7 +85,7 @@ generate:
 help:
 	@echo "$(YELLOW)📌 Available commands:$(RESET)"
 	@echo "$(GREEN)  make help$(RESET) - Show this help message"
-	@echo "$(GREEN)  make generate$(RESET) - generate all sketches"
+	@echo "$(GREEN)  make generate$(RESET) - Generate all found sketches"
 	@echo "$(GREEN)  make generate-$(BLUE)<ArduinoSketch>$(RESET) - Generate <ArduinoSketch> only"
 	@echo "$(YELLOW)📂 Sketches found:$(RESET)"
 	@for sketch in $(ALL_SKETCH_NAMES); do \
