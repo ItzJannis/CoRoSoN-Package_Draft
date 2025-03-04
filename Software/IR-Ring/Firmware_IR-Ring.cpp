@@ -382,7 +382,11 @@ void Loop() {
     yDir += (0.5f * aExpandedValues[iLeft] * _aFactorY[iLeft]) + (0.5f * aExpandedValues[iRight] * _aFactorY[iRight]);
   }
   signedDir = atan2(xDir, yDir) / _AngleStep_rad; // robot's x and y is swapped compared to math's
-  iDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
+  iDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)); // +/- 0.5 to round to next int
+  if (iDir < -31) {
+    iDir += ARRAY_LENGTH(aExpandedValues);
+  }
+  iDir += (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
   //
   // Calculate distance
   //
@@ -431,6 +435,10 @@ void Loop() {
   // Calc final direction
   //
   signedDir = atan2(DirXMedian, DirYMedian) / _AngleStep_rad; // robot's x and y is swapped compared to math's
-  _BallDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)) + (ARRAY_LENGTH(aExpandedValues) / 2) - 1; // +/- 0.5 to round to next int
+  iDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)); // +/- 0.5 to round to next int
+  if (iDir < -31) {
+    iDir += ARRAY_LENGTH(aExpandedValues);
+  }
+  _BallDir = iDir + (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
   _BallDist = DistMedian;
 }

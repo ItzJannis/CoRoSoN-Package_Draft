@@ -135,7 +135,7 @@ enum ERROR_CODE : ERRORS {
 #define ABS(X) ((X) < 0 ? -(X) : (X))
 
 // Returns the number of elements in the passed array
-#define ARRAY_LENGTH(Arr) (sizeof(Arr) / sizeof(*Arr))
+#define ARRAY_LENGTH(Arr) (signed long)(sizeof(Arr) / sizeof(*Arr))
 
 // Fills the bytes at the adress of the passed offset with 0's
 #define ZEROMEM(Obj) memset(&Obj, 0, sizeof(Obj))
