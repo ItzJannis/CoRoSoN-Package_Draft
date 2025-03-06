@@ -43,21 +43,25 @@ Pixy::Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal) {
   this->mPriv.Address          = Address;
   this->mPriv.SignatureGoal    = SignatureGoal;
   this->mPriv.SignatureOwnGoal = SignatureOwnGoal;
+}
+
+ERRORS Pixy::Init() {
+  ERRORS r;
+
+  r = OKAY;
 #if (PIXY_VERSION == 1)
-  this->mPriv.pPixyV1 = new PixyI2C();
-  if(this->mPriv.pPixyV1->init(this->mPriv.Address) < 0) {
-    DEBUG_ERRORS(CONNECT_FAILED);
-    DEBUG_PRINT(Address);
-    DEBUG_BLOCK("Pixy init failed", 1000);
-  }
+  this->mPriv.pPixyV1 = new PixyI2C(this->mPriv.Address);
+  this->mPriv.pPixyV1->init();
 #elif (PIXY_VERSION == 2)
   this->mPriv.pPixyV2 = new Pixy2I2C();
   if(this->mPriv.pPixyV2->init(this->mPriv.Address) < 0) {
-    DEBUG_ERRORS(CONNECT_FAILED);
-    DEBUG_PRINT(Address);
+    r |= CONNECT_FAILED;
+    DEBUG_ERRORS(r);
+    DEBUG_PRINT(this->mPriv.Address);
     DEBUG_BLOCK("Pixy init failed", 1000);
   }
 #endif
+  return r;
 }
 
 ERRORS Pixy::Update(void) {
@@ -84,11 +88,6 @@ ERRORS Pixy::Update(void) {
 #elif (PIXY_VERSION == 2)
   NumBlocks = this->mPriv.pPixyV2->ccc.getBlocks();
 #endif
-  if(NumBlocks <= 0) {
-    r |= CONNECT_FAILED | INVALID_ANSWER | ERROR_BREAK_OUT;
-    DEBUG_ERRORS(r);
-    return r;
-  }
   //
   // Read data
   //
