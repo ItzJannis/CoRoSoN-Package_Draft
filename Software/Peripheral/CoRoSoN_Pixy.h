@@ -31,11 +31,23 @@
 #define COROSON_PIXY_H
 /*********************************************************************
 * 
+*  Config
+*
+*********************************************************************/
+#define PIXY_VERSION (2) // Set according to your setup
+/*********************************************************************
+* 
 *  Dependencies
 *
 *********************************************************************/
 #include <Arduino.h>
-#include <Pixy2I2C.h>
+#if (PIXY_VERSION == 1)
+  #include <PixyI2C.h>
+#elif (PIXY_VERSION == 2)
+  #include <Pixy2I2C.h>
+#elif
+  #error "Config-Error: PIXY_VERSION must be either 1 or 2"
+#endif
 #include "../Shared/CoRoSoN_Util.h"
 /*********************************************************************
 * 
@@ -56,6 +68,16 @@ public:
   *
   ************************************************************/
   Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal);
+
+  /************************************************************
+  *
+  * ? Init()
+  *   
+  * * Description:
+  *     Initializes the camera
+  *
+  ************************************************************/
+  ERRORS Init(void);
 
   /************************************************************
   *
@@ -115,7 +137,11 @@ public:
   
 private:
   struct {
-    Pixy2I2C*      pPixy;
+#if (PIXY_VERSION == 1)
+    PixyI2C*       pPixyV1;
+#elif (PIXY_VERSION == 2)
+    Pixy2I2C*      pPixyV2;
+#endif
     unsigned short Address;
              int   SignatureGoal;
              int   SignatureOwnGoal;

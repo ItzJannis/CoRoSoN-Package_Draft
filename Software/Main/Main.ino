@@ -1,10 +1,13 @@
 #include "CoRoSoN_Main.h"
 #include "../Peripheral/CoRoSoN_IR-Ring.h"
+#include "../Peripheral/CoRoSoN_Pixy.h"
 
 IRRing irRing(I2C_ADD_IR);
+Pixy pixy(I2C_ADD_PIXY, 1, 2);
 
 void setup() {
   CoRoSoN_Init();
+  pixy.Init();
 }
 
 void loop() {
@@ -35,9 +38,14 @@ void loop() {
   DEBUG_PRINT(irRing.SeesBall());
   DEBUG_PRINT(irRing.BallDirection());
   DEBUG_PRINT(irRing.BallDistance());
+  DEBUG_PRINT(pixy.SeesGoal());
+  DEBUG_PRINT(pixy.DirectionGoal());
+  DEBUG_PRINT(pixy.SeesOwnGoal());
+  DEBUG_PRINT(pixy.DirectionOwnGoal());
   //
   // Update
   //
   irRing.Update();
+  pixy.Update();
   delay(5);
 }

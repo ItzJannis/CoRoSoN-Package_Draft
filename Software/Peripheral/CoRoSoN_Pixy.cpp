@@ -43,16 +43,30 @@ Pixy::Pixy(unsigned short Address, int SignatureGoal, int SignatureOwnGoal) {
   this->mPriv.Address          = Address;
   this->mPriv.SignatureGoal    = SignatureGoal;
   this->mPriv.SignatureOwnGoal = SignatureOwnGoal;
-  this->mPriv.pPixy = new Pixy2I2C();
-  if(this->mPriv.pPixy->init(this->mPriv.Address) < 0) {
-    DEBUG_ERRORS(CONNECT_FAILED);
-    DEBUG_PRINT(Address);
+}
+
+ERRORS Pixy::Init() {
+  ERRORS r;
+
+  r = OKAY;
+#if (PIXY_VERSION == 1)
+  this->mPriv.pPixyV1 = new PixyI2C(this->mPriv.Address);
+  this->mPriv.pPixyV1->init();
+#elif (PIXY_VERSION == 2)
+  this->mPriv.pPixyV2 = new Pixy2I2C();
+  if(this->mPriv.pPixyV2->init(this->mPriv.Address) < 0) {
+    r |= CONNECT_FAILED;
+    DEBUG_ERRORS(r);
+    DEBUG_PRINT(this->mPriv.Address);
     DEBUG_BLOCK("Pixy init failed", 1000);
   }
+#endif
+  return r;
 }
 
 ERRORS Pixy::Update(void) {
   ERRORS r;
+  int    NumBlocks;
   int    Signature;
   int    X;
   bool   UpdatedGoal;
@@ -65,21 +79,26 @@ ERRORS Pixy::Update(void) {
   X         = 0;
   UpdatedGoal    = false;
   UpdatedOwnGoal = false;
+  NumBlocks = 0;
   //
   // Establish connection
   //
-  this->mPriv.pPixy->ccc.getBlocks();
-  if(this->mPriv.pPixy->ccc.numBlocks <= 0) {
-    r |= CONNECT_FAILED | INVALID_ANSWER | ERROR_BREAK_OUT;
-    DEBUG_ERRORS(r);
-    return r;
-  }
+#if (PIXY_VERSION == 1)
+  NumBlocks = this->mPriv.pPixyV1->getBlocks();
+#elif (PIXY_VERSION == 2)
+  NumBlocks = this->mPriv.pPixyV2->ccc.getBlocks();
+#endif
   //
   // Read data
   //
-  for(int i = 0; i < this->mPriv.pPixy->ccc.numBlocks; i++) {
-    Signature = this->mPriv.pPixy->ccc.blocks[i].m_signature;
-    X         = this->mPriv.pPixy->ccc.blocks[i].m_x;
+  for(int i = 0; i < NumBlocks; i++) {
+#if (PIXY_VERSION == 1)
+    Signature = this->mPriv.pPixyV1->blocks[i].signature;
+    X         = this->mPriv.pPixyV1->blocks[i].x;
+#elif (PIXY_VERSION == 2)
+    Signature = this->mPriv.pPixyV2->ccc.blocks[i].m_signature;
+    X         = this->mPriv.pPixyV2->ccc.blocks[i].m_x;
+#endif
     if(Signature == this->mPriv.SignatureGoal) {
       UpdatedGoal          = true;
       this->mPriv.SeesGoal = true;

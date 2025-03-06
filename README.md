@@ -34,7 +34,8 @@ Run `make` inside the home directory of this repo to see all the options.
 1. [Arduino](https://www.arduino.cc/)
 2. [Espressif ESP32 Board Information](https://github.com/espressif/arduino-esp32)
 3. [elapsedMillis](https://github.com/pfeerick/elapsedMillis/wiki)
-4. [Pixy2I2C](https://github.com/charmedlabs/pixy2/blob/master/src/host/arduino/libraries/Pixy2/Pixy2I2C.h)
+4. [PixyI2C](https://pixycam.com/downloads-pixy1/)
+5. [Pixy2I2C](https://pixycam.com/downloads-pixy2/)
 
 
 ## Shared
@@ -74,6 +75,7 @@ The `struct EEPROM_DATA` can be filled with whatever you want to read / write fr
 
 ### CoRoSoN_Pixy
 Providing `class Pixy` with its `Update()`, `SeesGoal()`, `SeesOwnGoal()`, `DirectionGoal()` and `DirectionOwnGoal()` to make use of the Pixy camera for locating the two goals on the playing field. \
+In `CoRoSoN_Pixy.h` set `PIXY_VERSION` to 1 or 2 according to the version of the Pixy cam in use. \
 For the directions: <0 represents left, >0 represents right
 
 ### CoRoSoN_IR-Ring
