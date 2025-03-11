@@ -103,17 +103,8 @@ Providing the firmware that is designed to be loaded onto the infrared sensor ri
 12. Compute final direction and distance with running median - `RUNNING_MEDIAN_DIRECTION_LENGTH` and `RUNNING_MEDIAN_DISTANCE_LENGTH` define the history length for the running medians
 
 # Hardware
-## Used 3rd Parties
-### Compass
-to be done
-
-### Pixy2
-to be done
-
-
-## Mainboard
-to be done
-
+## Main
+Contains the [KiCad](https://www.kicad.org/download/) project of the Main PCB. 
 
 ## IR-Ring
-to be done
+Contains the [KiCad](https://www.kicad.org/download/) project of the IR-Ring PCB. 
