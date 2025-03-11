@@ -223,12 +223,15 @@ static void _MergeSort_float(float aNumbers[], int iLeft, int iRight) {
 void Loop() {
   static int   aRawValues[NUM_SENSORS];
   static int   MinRawValue;
-  static float aEMAValues    [NUM_SENSORS];
-  static float aBlurredValues[NUM_SENSORS];
+  static float aEMAValues        [NUM_SENSORS];
+  static float aBlurredValuesDir [NUM_SENSORS];
+  static float aBlurredValuesDist[NUM_SENSORS];
   static float MaxBlurredValue;
-  static float aExpandedValues[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
+  static float aExpandedValuesDir [NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
+  static float aExpandedValuesDist[NUM_SENSORS * EXPAND_FACTOR_PER_SENSOR];
   static float MaxExpandedValue;
   static float TotalSum;
+  static float VectorSum;
   static float DistPercentage;
   static int   iMaximum;
   static float xDir;
@@ -242,8 +245,10 @@ void Loop() {
 
   _CheckSetup();
   ZEROMEM(aRawValues);
-  ZEROMEM(aBlurredValues);
-  ZEROMEM(aExpandedValues);
+  ZEROMEM(aBlurredValuesDir);
+  ZEROMEM(aBlurredValuesDist);
+  ZEROMEM(aExpandedValuesDir);
+  ZEROMEM(aExpandedValuesDist);
   //
   // Read sensors
   //
@@ -278,12 +283,19 @@ void Loop() {
   for (int i = 0; i < ARRAY_LENGTH(aEMAValues); i++) {
     int iLeft  = (i - 1 + ARRAY_LENGTH(aEMAValues)) % ARRAY_LENGTH(aEMAValues);
     int iRight = (i + 1) % ARRAY_LENGTH(aEMAValues);
-    aBlurredValues[i]  = aEMAValues[i]      * 0.01f * (float)BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
-    aBlurredValues[i] += aEMAValues[iLeft ] * 0.01f * (float)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0f;
-    aBlurredValues[i] += aEMAValues[iRight] * 0.01f * (float)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0f;
-    if (aBlurredValues[i] > MaxBlurredValue) {
-      MaxBlurredValue = aBlurredValues[i];
+    aBlurredValuesDist[i]  = aEMAValues[i]      * 0.01f * (float)BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE;
+    aBlurredValuesDist[i] += aEMAValues[iLeft ] * 0.01f * (float)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0f;
+    aBlurredValuesDist[i] += aEMAValues[iRight] * 0.01f * (float)(100 - BLUR_ORIGINAL_VALUE_WEIGHT_PERCENTAGE) / 2.0f;
+    if (aBlurredValuesDist[i] > MaxBlurredValue) {
+      MaxBlurredValue = aBlurredValuesDist[i];
     }
+  }
+  //
+  // Exaggerate differences for more significant peaks
+  //
+  for (int i = 0; i < ARRAY_LENGTH(aBlurredValuesDir); i++) {
+    float p = aBlurredValuesDist[i] / MaxBlurredValue;
+    aBlurredValuesDir[i] = p * p * MaxBlurredValue;
   }
   //
   // Abort if highest value lower than minimum value for detecting a ball
@@ -292,13 +304,6 @@ void Loop() {
     _BallDir = 0;
     _BallDist = 0;
     return;
-  }
-  //
-  // Exaggerate differences for more significant peaks
-  //
-  for (int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
-    float p = aBlurredValues[i] / MaxBlurredValue;
-    aBlurredValues[i] = p * p * MaxBlurredValue;
   }
   //
   // Expand values by cubic interpolation:
@@ -313,34 +318,68 @@ void Loop() {
   //      c = d0
   //      d = y0
   //
-  for(int i = 0; i < ARRAY_LENGTH(aBlurredValues); i++) {
-    int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValues);
-    int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValues);
-    float y0 = aBlurredValues[i];
-    float y1 = aBlurredValues[iNext];
-    float d0 = aBlurredValues[iNext] - aBlurredValues[i];
-    float d1 = aBlurredValues[iNextNext] - aBlurredValues[iNext];
+  for(int i = 0; i < ARRAY_LENGTH(aBlurredValuesDist); i++) {
+    int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValuesDist);
+    int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValuesDist);
+    float y0 = aBlurredValuesDist[i];
+    float y1 = aBlurredValuesDist[iNext];
+    float d0 = aBlurredValuesDist[iNext] - aBlurredValuesDist[i];
+    float d1 = aBlurredValuesDist[iNextNext] - aBlurredValuesDist[iNext];
     float a =   (2.0f * y0) - (2.0f * y1) +         d0  + d1;
     float b = - (3.0f * y0) + (3.0f * y1) - (2.0f * d0) - d1;
     float c = d0;
     float d = y0;
     for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
-      int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValues);
+      int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValuesDist);
       float Percentage = (float)j / (float)EXPAND_FACTOR_PER_SENSOR;
-      aExpandedValues[iCurrent]  = a * Percentage * Percentage * Percentage;
-      aExpandedValues[iCurrent] += b * Percentage * Percentage;
-      aExpandedValues[iCurrent] += c * Percentage;
-      aExpandedValues[iCurrent] += d;
-      if (aExpandedValues[iCurrent] < 0.0f) { // negative values might mess up vector addition
-        aExpandedValues[iCurrent] = 0.0f;
+      aExpandedValuesDist[iCurrent]  = a * Percentage * Percentage * Percentage;
+      aExpandedValuesDist[iCurrent] += b * Percentage * Percentage;
+      aExpandedValuesDist[iCurrent] += c * Percentage;
+      aExpandedValuesDist[iCurrent] += d;
+      if (aExpandedValuesDist[iCurrent] < 0.0f) { // negative values might mess up vector addition
+        aExpandedValuesDist[iCurrent] = 0.0f;
       }
-      float Dist = MIN(ABS(i - _BallDir), ARRAY_LENGTH(aExpandedValues) - ABS(i - _BallDir));
+      float Dist = MIN(ABS(i - _BallDir), ARRAY_LENGTH(aExpandedValuesDist) - ABS(i - _BallDir));
       if (Dist <= VECTOR_ADDITION_SENSOR_COUNT / 2) { 
         // take into account last output, to scale nearby values up
         // this reduces noisy fluctuations while significant changes will be kept 
         // due to relative increase and squared difference exeggeration afterwards
         float p = (float)Dist * 2.0f / (float)VECTOR_ADDITION_SENSOR_COUNT;
-        aExpandedValues[i] *= 1.05f - (0.05f * p);
+        aExpandedValuesDist[i] *= 1.05f - (0.05f * p);
+      }
+    }
+  }
+  //
+  // Recalculate interpolation for direction to work properly (exaggeration needed)
+  //
+  for(int i = 0; i < ARRAY_LENGTH(aBlurredValuesDir); i++) {
+    int iNext     = (i + 1) % ARRAY_LENGTH(aBlurredValuesDir);
+    int iNextNext = (i + 2) % ARRAY_LENGTH(aBlurredValuesDir);
+    float y0 = aBlurredValuesDir[i];
+    float y1 = aBlurredValuesDir[iNext];
+    float d0 = aBlurredValuesDir[iNext] - aBlurredValuesDir[i];
+    float d1 = aBlurredValuesDir[iNextNext] - aBlurredValuesDir[iNext];
+    float a =   (2.0f * y0) - (2.0f * y1) +         d0  + d1;
+    float b = - (3.0f * y0) + (3.0f * y1) - (2.0f * d0) - d1;
+    float c = d0;
+    float d = y0;
+    for(int j = 0; j < EXPAND_FACTOR_PER_SENSOR; j++) { // expand values
+      int iCurrent = (((i+1) * EXPAND_FACTOR_PER_SENSOR) + j - 1) % ARRAY_LENGTH(aExpandedValuesDir);
+      float Percentage = (float)j / (float)EXPAND_FACTOR_PER_SENSOR;
+      aExpandedValuesDir[iCurrent]  = a * Percentage * Percentage * Percentage;
+      aExpandedValuesDir[iCurrent] += b * Percentage * Percentage;
+      aExpandedValuesDir[iCurrent] += c * Percentage;
+      aExpandedValuesDir[iCurrent] += d;
+      if (aExpandedValuesDir[iCurrent] < 0.0f) { // negative values might mess up vector addition
+        aExpandedValuesDir[iCurrent] = 0.0f;
+      }
+      float Dist = MIN(ABS(i - _BallDir), ARRAY_LENGTH(aExpandedValuesDir) - ABS(i - _BallDir));
+      if (Dist <= VECTOR_ADDITION_SENSOR_COUNT / 2) { 
+        // take into account last output, to scale nearby values up
+        // this reduces noisy fluctuations while significant changes will be kept 
+        // due to relative increase and squared difference exeggeration afterwards
+        float p = (float)Dist * 2.0f / (float)VECTOR_ADDITION_SENSOR_COUNT;
+        aExpandedValuesDir[i] *= 1.05f - (0.05f * p);
       }
     }
   }
@@ -349,49 +388,58 @@ void Loop() {
   //
   iMaximum = 0;
   MaxExpandedValue = 0;
-  for (int i = 1; i < ARRAY_LENGTH(aExpandedValues); i++) {
-    if (aExpandedValues[i] > MaxExpandedValue) {
+  for (int i = 1; i < ARRAY_LENGTH(aExpandedValuesDir); i++) {
+    if (aExpandedValuesDir[i] > MaxExpandedValue) {
       iMaximum = i;
-      MaxExpandedValue = aExpandedValues[i];
+      MaxExpandedValue = aExpandedValuesDir[i];
     }
   }
   //
   // Exaggerate differences for more significant peaks
   //
+  for (int i = 0; i < ARRAY_LENGTH(aExpandedValuesDir); i++) {
+    float p = aExpandedValuesDir[i] / (float)MaxExpandedValue;
+    aExpandedValuesDir[i] = p * p * (float)MaxExpandedValue;
+  }
+  //
+  // Get Total sum of expanded values
+  //
   TotalSum = 0.0f;
-  for (int i = 0; i < ARRAY_LENGTH(aExpandedValues); i++) {
-    float p = aExpandedValues[i] / (float)MaxExpandedValue;
-    aExpandedValues[i] = p * p * (float)MaxExpandedValue;
-    TotalSum += aExpandedValues[i];
+  for (int i = 0; i < ARRAY_LENGTH(aExpandedValuesDist); i++) {
+    TotalSum += aExpandedValuesDist[i];
   }
   //
   // Get direction by vector addition in the cone around highest value
   //
-  xDir = aExpandedValues[iMaximum] * _aFactorX[iMaximum];
-  yDir = aExpandedValues[iMaximum] * _aFactorY[iMaximum];
+  xDir = aExpandedValuesDir[iMaximum] * _aFactorX[iMaximum];
+  yDir = aExpandedValuesDir[iMaximum] * _aFactorY[iMaximum];
+  VectorSum = aExpandedValuesDist[iMaximum];
   for (int i = 1; i < (VECTOR_ADDITION_SENSOR_COUNT - 1) / 2; i++) {
-    int iLeft  = (iMaximum - i + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
-    int iRight = (iMaximum + i) % ARRAY_LENGTH(aExpandedValues);
-    xDir += (aExpandedValues[iLeft] * _aFactorX[iLeft]) + (aExpandedValues[iRight] * _aFactorX[iRight]);
-    yDir += (aExpandedValues[iLeft] * _aFactorY[iLeft]) + (aExpandedValues[iRight] * _aFactorY[iRight]);
+    int iLeft  = (iMaximum - i  + ARRAY_LENGTH(aExpandedValuesDir)) % ARRAY_LENGTH(aExpandedValuesDir);
+    int iRight = (iMaximum + i) % ARRAY_LENGTH(aExpandedValuesDir);
+    xDir += (aExpandedValuesDir[iLeft] * _aFactorX[iLeft]) + (aExpandedValuesDir[iRight] * _aFactorX[iRight]);
+    yDir += (aExpandedValuesDir[iLeft] * _aFactorY[iLeft]) + (aExpandedValuesDir[iRight] * _aFactorY[iRight]);
+    VectorSum += aExpandedValuesDist[iLeft];
+    VectorSum += aExpandedValuesDist[iRight];
   }
   if (VECTOR_ADDITION_SENSOR_COUNT % 2 == 0 ) { // ensure added vectors are centered around maximum
-    int iLeft  = (iMaximum - (VECTOR_ADDITION_SENSOR_COUNT / 2) + ARRAY_LENGTH(aExpandedValues)) % ARRAY_LENGTH(aExpandedValues);
-    int iRight = (iMaximum + (VECTOR_ADDITION_SENSOR_COUNT / 2)) % ARRAY_LENGTH(aExpandedValues);
-    xDir += (0.5f * aExpandedValues[iLeft] * _aFactorX[iLeft]) + (0.5f * aExpandedValues[iRight] * _aFactorX[iRight]);
-    yDir += (0.5f * aExpandedValues[iLeft] * _aFactorY[iLeft]) + (0.5f * aExpandedValues[iRight] * _aFactorY[iRight]);
+    int iLeft  = (iMaximum - (VECTOR_ADDITION_SENSOR_COUNT / 2)  + ARRAY_LENGTH(aExpandedValuesDir)) % ARRAY_LENGTH(aExpandedValuesDir);
+    int iRight = (iMaximum + (VECTOR_ADDITION_SENSOR_COUNT / 2)) % ARRAY_LENGTH(aExpandedValuesDir);
+    xDir += (0.5f * aExpandedValuesDir[iLeft] * _aFactorX[iLeft]) + (0.5f * aExpandedValuesDir[iRight] * _aFactorX[iRight]);
+    yDir += (0.5f * aExpandedValuesDir[iLeft] * _aFactorY[iLeft]) + (0.5f * aExpandedValuesDir[iRight] * _aFactorY[iRight]);
+    VectorSum += aExpandedValuesDist[iLeft] * 0.5f;
+    VectorSum += aExpandedValuesDist[iRight] * 0.5f;
   }
   signedDir = atan2(xDir, yDir) / _AngleStep_rad; // robot's x and y is swapped compared to math's
   iDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)); // +/- 0.5 to round to next int
   if (iDir < -31) {
-    iDir += ARRAY_LENGTH(aExpandedValues);
+    iDir += ARRAY_LENGTH(aExpandedValuesDir);
   }
-  iDir += (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
+  iDir += (ARRAY_LENGTH(aExpandedValuesDir) / 2) - 1;
   //
-  // Calculate distance
+  // Calculate distance by how big the proportion of all values compared to vector cone is
   //
-  DistPercentage = TotalSum / (aExpandedValues[iDir] * ARRAY_LENGTH(aExpandedValues) / 2.0f);
-  DistPercentage = MIN(MAX(0.0f, 1.0 - DistPercentage), 1.0f);
+  DistPercentage = VectorSum / TotalSum;
   //
   // Update running medians: Y_i = a * X_i + (1-a) * Y_(i-1) with a in ]0;1]
   //
@@ -412,7 +460,7 @@ void Loop() {
   for (int i = 0; i < ARRAY_LENGTH(aDistHistory) - 1; i++) {
     aDistHistory[i] = aDistHistory[i+1];
   }
-  aDistHistory[ARRAY_LENGTH(aDistHistory) - 1] = (DistPercentage * (float)ARRAY_LENGTH(aExpandedValues)) + 0.5f; // + 0.5f to round to next int
+  aDistHistory[ARRAY_LENGTH(aDistHistory) - 1] = (DistPercentage * (float)ARRAY_LENGTH(aExpandedValuesDist)) + 0.5f; // + 0.5f to round to next int
   //
   // Sort arrays
   //
@@ -437,8 +485,8 @@ void Loop() {
   signedDir = atan2(DirXMedian, DirYMedian) / _AngleStep_rad; // robot's x and y is swapped compared to math's
   iDir = (int)(signedDir + ((signedDir < 0) ? -0.5f : 0.5f)); // +/- 0.5 to round to next int
   if (iDir < -31) {
-    iDir += ARRAY_LENGTH(aExpandedValues);
+    iDir += ARRAY_LENGTH(aExpandedValuesDir);
   }
-  _BallDir = iDir + (ARRAY_LENGTH(aExpandedValues) / 2) - 1;
+  _BallDir = iDir + (ARRAY_LENGTH(aExpandedValuesDir) / 2) - 1;
   _BallDist = DistMedian;
 }
