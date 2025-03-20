@@ -58,18 +58,18 @@ ERRORS IRRing::Update() {
     return r;
   }
   // Default: not seen
-  this->mPriv.SeesBall      = false;
+  this->mPriv.BallSeen      = false;
   this->mPriv.BallDirection = -32;
   this->mPriv.BallDistance  = aAnswer[1];
   if(this->mPriv.BallDistance > 0) {
-    this->mPriv.SeesBall      = true;
+    this->mPriv.BallSeen      = true;
     this->mPriv.BallDirection = aAnswer[0] - 31;
   }
   return r;
 }
 
-bool IRRing::SeesBall() {
-  return this->mPriv.SeesBall;
+bool IRRing::BallSeen() {
+  return this->mPriv.BallSeen;
 }
 
 int IRRing::BallDirection() {

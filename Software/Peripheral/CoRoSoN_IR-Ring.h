@@ -65,13 +65,13 @@ public:
 
   /************************************************************
   *
-  * ? SeesBall()
+  * ? BallSeen()
   *   
   * * Description:
   *     Returns if the ball is seen
   *
   ************************************************************/
-  bool SeesBall(void);
+  bool BallSeen(void);
 
   /************************************************************
   *
@@ -107,7 +107,7 @@ public:
 private:
   struct {
     unsigned short Address;
-             bool  SeesBall;
+             bool  BallSeen;
              int   BallDirection;
              int   BallDistance;
   } mPriv;

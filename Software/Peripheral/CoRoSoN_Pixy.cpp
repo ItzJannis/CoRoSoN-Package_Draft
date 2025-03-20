@@ -101,38 +101,38 @@ ERRORS Pixy::Update(void) {
 #endif
     if(Signature == this->mPriv.SignatureGoal) {
       UpdatedGoal          = true;
-      this->mPriv.SeesGoal = true;
-      this->mPriv.DirectionGoal = (X - 158) / 2;
+      this->mPriv.GoalSeen = true;
+      this->mPriv.GoalDirection = (X - 158) / 2;
     }
     if(Signature == this->mPriv.SignatureOwnGoal) {
       UpdatedOwnGoal          = true;
-      this->mPriv.SeesOwnGoal = true;
-      this->mPriv.DirectionOwnGoal = (X - 158) / 2;
+      this->mPriv.OwnGoalSeen = true;
+      this->mPriv.OwnGoalDirection = (X - 158) / 2;
     }
   }
   if(!UpdatedGoal) {
-    this->mPriv.SeesGoal      = false;
-    this->mPriv.DirectionGoal = 0;
+    this->mPriv.GoalSeen      = false;
+    this->mPriv.GoalDirection = 0;
   }
   if(!UpdatedOwnGoal) {
-    this->mPriv.SeesOwnGoal      = false;
-    this->mPriv.DirectionOwnGoal = 0;
+    this->mPriv.OwnGoalSeen      = false;
+    this->mPriv.OwnGoalDirection = 0;
   }
   return r;
 }
 
-bool Pixy::SeesGoal() {
-  return this->mPriv.SeesGoal;
+bool Pixy::GoalSeen() {
+  return this->mPriv.GoalSeen;
 }
 
-bool Pixy::SeesOwnGoal() {
-  return this->mPriv.SeesOwnGoal;
+bool Pixy::OwnGoalSeen() {
+  return this->mPriv.OwnGoalSeen;
 }
 
-int Pixy::DirectionGoal() {
-  return this->mPriv.DirectionGoal;
+int Pixy::GoalDirection() {
+  return this->mPriv.GoalDirection;
 }
 
-int Pixy::DirectionOwnGoal() {
-  return this->mPriv.DirectionOwnGoal;
+int Pixy::OwnGoalDirection() {
+  return this->mPriv.OwnGoalDirection;
 }

@@ -74,12 +74,12 @@ The `struct EEPROM_DATA` can be filled with whatever you want to read / write fr
 `EEPROM_Init()`, `EEPROM_Read()` and `EEPROM_Write()` provide an easy interface that only deals with instances of `EEPROM_DATA`.
 
 ### CoRoSoN_Pixy
-Providing `class Pixy` with its `Update()`, `SeesGoal()`, `SeesOwnGoal()`, `DirectionGoal()` and `DirectionOwnGoal()` to make use of the Pixy camera for locating the two goals on the playing field. \
+Providing `class Pixy` with its `Update()`, `GoalSeen()`, `OwnGoalSeen()`, `GoalDirection()` and `OwnGoalDirection()` to make use of the Pixy camera for locating the two goals on the playing field. \
 In `CoRoSoN_Pixy.h` set `PIXY_VERSION` to 1 or 2 according to the version of the Pixy cam in use. \
 For the directions: <0 represents left, >0 represents right
 
 ### CoRoSoN_IR-Ring
-Providing `class IRRing` with its `Update()`, `SeesBall()`, `BallDirection()` and `BallDistance()` to make use of the infrared sensor ring with the firmware running on it (also provided).
+Providing `class IRRing` with its `Update()`, `BallSeen()`, `BallDirection()` and `BallDistance()` to make use of the infrared sensor ring with the firmware running on it (also provided).
 For the directions: <0 represents left, >0 represents right, 0 represents front, -32 represents no ball seen
 For the distance: 1...32 represents closest...furthest, 0 represents no ball seen
 

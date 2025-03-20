@@ -91,27 +91,27 @@ public:
 
   /************************************************************
   *
-  * ? SeesGoal()
+  * ? GoalSeen()
   *   
   * * Description:
   *     Returns if the goal is seen
   *
   ************************************************************/
-  bool SeesGoal(void);
+  bool GoalSeen(void);
 
   /************************************************************
   *
-  * ? SeesOwnGoal()
+  * ? OwnGoalSeen()
   *   
   * * Description:
   *     Returns if the own goal is seen
   *
   ************************************************************/
-  bool SeesOwnGoal(void);
+  bool OwnGoalSeen(void);
   
   /************************************************************
   *
-  * ? DirectionGoal()
+  * ? GoalDirection()
   *   
   * * Description:
   *     Returns the goals directions in terms of pixels
@@ -120,11 +120,11 @@ public:
   *     > 0 => goal to the right
   *
   ************************************************************/
-  int DirectionGoal(void);
+  int GoalDirection(void);
   
   /************************************************************
   *
-  * ? DirectionOwnGoal()
+  * ? OwnGoalDirection()
   *   
   * * Description:
   *     Returns the own goals directions in terms of pixels
@@ -133,7 +133,7 @@ public:
   *     > 0 => own goal to the right
   *
   ************************************************************/
-  int DirectionOwnGoal(void);
+  int OwnGoalDirection(void);
   
 private:
   struct {
@@ -145,10 +145,10 @@ private:
     unsigned short Address;
              int   SignatureGoal;
              int   SignatureOwnGoal;
-             bool  SeesGoal;
-             bool  SeesOwnGoal;
-             int   DirectionGoal;
-             int   DirectionOwnGoal;
+             bool  GoalSeen;
+             bool  OwnGoalSeen;
+             int   GoalDirection;
+             int   OwnGoalDirection;
   } mPriv;
 };
 #endif // COROSON_PIXY_H
