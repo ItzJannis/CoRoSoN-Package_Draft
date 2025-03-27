@@ -108,3 +108,33 @@ Contains the [KiCad](https://www.kicad.org/download/) project of the Main PCB.
 
 ## IR-Ring
 Contains the [KiCad](https://www.kicad.org/download/) project of the IR-Ring PCB. 
+
+## 3D_Prints
+Contains all the 3D printable designs as .stl files.
+
+### CasterBall
+Spherical third ground contact point to prevent the robot from falling over due to having only 2 wheels.
+### Chassis_TopPlate
+The main plate enclosing the chassis, also including part of the machanism to hold the battery pack.
+### Dribbler_Enclosure
+Holds the dribbling unit (motor and rotating silicone shell).
+### Dribbler_Enclosure_EndCap
+The end cap to close the enclosure of the dribbling unit.
+### Dribbler_Mounting
+Add-On to the top plate to mount the dribbling unit and support the IR-Ring up on top.
+### Dribbler_Mounting_short
+Shorter version of Dribbler_Mounting.stl in terms of height.
+### Dribbler_ShellCoupling
+Coupling adapter to connect the rotating shell to the motor axis.
+### Dribbler_SiliconeRoller
+Rotating shell of the dribbling unit, supposed to be covered with silicone.
+### IR-Ring_Cover
+Covers the IR-Ring PCB to reduce external ambient noise for the sensors.
+### IR-Ring_Cover_Counterpart
+Counterpart for the IR-Ring cover such that it is properly fixated.
+### Main_Frame
+Mounting frame for the Main PCB.
+### Pixy_Mounting
+Mounting frame for pixy camera.
+### WheelCoupling
+Coupling adapter to connect the wheels to the motor axis.
