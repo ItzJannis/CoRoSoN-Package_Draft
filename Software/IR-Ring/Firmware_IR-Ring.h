@@ -54,11 +54,15 @@
 #define MIN_VALUE_TO_DETECT (50)
 #define RUNNING_MEDIAN_DIRECTION_LENGTH (16)
 #define RUNNING_MEDIAN_DISTANCE_LENGTH  (16)
+#define NUM_HELPER_SENSORS (4)
+//#define HELPER_SENSOR_BOOST // uncomment to not use it
 //
 // Hardware Config
 //
 // "Direction":                                  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7   8
 const unsigned short SENSOR_PINS[NUM_SENSORS] = {27, 26, 25, 33, 32, 35, 34, 19, 18, 05, 17, 04, 02, 15, 13, 14};
+//                                                              left to right
+const unsigned short HELPER_SENSOR_PINS[NUM_HELPER_SENSORS] = {39, 36, 16, 23};
 /*********************************************************************
 * 
 *  Functions

@@ -122,6 +122,9 @@ ERRORS Setup() {
   for(int i = 0; i < ARRAY_LENGTH(SENSOR_PINS); i++) {
     pinMode(SENSOR_PINS[i], INPUT);
   }
+  for(int i = 0; i < ARRAY_LENGTH(HELPER_SENSOR_PINS); i++) {
+    pinMode(HELPER_SENSOR_PINS[i], INPUT);
+  }
   Wire.onRequest(_OnRequest);
   Wire.onReceive(_OnReceive);
   if(!Wire.begin(I2C_ADD_IR)) {
@@ -222,6 +225,7 @@ static void _MergeSort_float(float aNumbers[], int iLeft, int iRight) {
 
 void Loop() {
   static int   aRawValues[NUM_SENSORS];
+  static int   aRawValuesHelper[NUM_HELPER_SENSORS];
   static int   MinRawValue;
   static float aEMAValues        [NUM_SENSORS];
   static float aBlurredValuesDir [NUM_SENSORS];
@@ -245,6 +249,7 @@ void Loop() {
 
   _CheckSetup();
   ZEROMEM(aRawValues);
+  ZEROMEM(aRawValuesHelper);
   ZEROMEM(aBlurredValuesDir);
   ZEROMEM(aBlurredValuesDist);
   ZEROMEM(aExpandedValuesDir);
@@ -255,9 +260,21 @@ void Loop() {
   t = 0;
   while (t < 10) { // 10ms equal 12 runs of 833us each
     for (int i = 0; i < ARRAY_LENGTH(aRawValues); i++) {
-      aRawValues[i] += 1 - digitalRead(SENSOR_PINS[i]);                    
+      aRawValues[i] += 1 - digitalRead(SENSOR_PINS[i]);
+    }
+    for (int i = 0; i < ARRAY_LENGTH(aRawValuesHelper); i++) {
+      aRawValuesHelper[i] += 1 - digitalRead(HELPER_SENSOR_PINS[i]);
     }
   }
+#ifdef HELPER_SENSOR_BOOST
+  //
+  // Use helper sensors to boost front sensors in case that something (e.g. dribbling unit) blocks the light partly
+  //
+  for (int i = 0; i < ARRAY_LENGTH(aRawValuesHelper) - 1; i++) {
+    //                center of normal sensors                half of helper sensors          current index
+    aRawValues[((ARRAY_LENGTH(aRawValues) - 1) / 2) - ((ARRAY_LENGTH(aRawValuesHelper) - 1) / 2) + i] += (aRawValuesHelper[i] + aRawValuesHelper[i+1]) / 4; // Bost all sensors surrounded by helper sensors by 50% of the average of their values
+  }
+#endif // HELPER_SENSOR_BOOST
   //
   // Filter out background noice by subtracting minimum sensor value from all other
   //
