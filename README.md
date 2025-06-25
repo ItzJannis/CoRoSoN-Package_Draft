@@ -114,6 +114,8 @@ Contains all the 3D printable designs as .stl files.
 
 ### CasterBall
 Spherical third ground contact point to prevent the robot from falling over due to having only 2 wheels.
+### Chassis_Base
+The base part of the chassis fitting together with the top plate.
 ### Chassis_TopPlate
 The main plate enclosing the chassis, also including part of the machanism to hold the battery pack.
 ### Dribbler_Enclosure
@@ -124,8 +126,6 @@ The end cap to close the enclosure of the dribbling unit.
 Add-On to the top plate to mount the dribbling unit and support the IR-Ring up on top.
 ### Dribbler_Mounting_short
 Shorter version of Dribbler_Mounting.stl in terms of height.
-### Dribbler_ShellCoupling
-Coupling adapter to connect the rotating shell to the motor axis.
 ### Dribbler_SiliconeRoller
 Rotating shell of the dribbling unit, supposed to be covered with silicone.
 ### IR-Ring_Cover
@@ -134,7 +134,11 @@ Covers the IR-Ring PCB to reduce external ambient noise for the sensors.
 Counterpart for the IR-Ring cover such that it is properly fixated.
 ### Main_Frame
 Mounting frame for the Main PCB.
+### Motor_Mounting
+Mounting for the 2 motors that move the robot.
 ### Pixy_Mounting
 Mounting frame for pixy camera.
-### WheelCoupling
+### WheelCoupling_Direct
+Coupling adapter to connect the rotating shell to the motor axis.
+### WheelCoupling_Insert
 Coupling adapter to connect the wheels to the motor axis.
